@@ -1,0 +1,165 @@
+.exportar{
+    height: 100vh;
+    width: 100vw;
+    padding-top: 100px;
+    padding-left: 250px;
+    overflow: hidden;
+}
+
+@Media (max-width: 767px){
+    .exportar{
+        padding-left: 0px !important;
+    }
+
+    .exportarSelectArea select{
+        margin-right: 5px !important;
+    }
+
+    .exportardadosArea{
+        padding: 5px !important;
+    }
+
+    .dadosArea_box{
+        padding: 5px !important;
+    }
+
+    .ExportardadosArea_boxSearch{
+        flex-direction: column !important;
+        width: 100% !important;
+        justify-content: flex-start !important;
+        align-items: flex-start !important;
+        gap: 10px;
+    }
+}
+
+.exportarSelectArea{
+    margin-top: 20px;
+    margin-right: 50px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    height: 50px;
+    width: 100%;
+}
+
+.exportarSelectArea select{
+    border: 2px solid #fc8a38;
+    width: 250px;
+    height: 50px; 
+    margin-right: 5%;
+}
+
+.exportardadosArea{
+    height: calc(100% - 100px);
+    width: 100%;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    padding-right: 5%;
+    padding-left: 5%;
+    overflow-y: hidden;
+    gap: 15px;
+}
+
+.dadosArea_box {
+    border: 2px solid #fc8a38;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 100%;
+    overflow-y: hidden;
+    padding: 10px 50px 20px 50px;
+}
+
+.ExportardadosArea_boxSearch{
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.ExportardadosArea_boxSearch div{
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+}
+
+.ExportardadosArea_boxSearch input{
+    border: 2px solid #fc8a38;
+    width: 300px;
+    height: 50px; 
+    border-radius: 10px;
+    padding: 5px;
+}
+
+.ExportardadosArea_boxArea{
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+}
+
+.ExportardadosArea_boxAreaData{
+    background-color: #ededed;
+    border-radius: 12px;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.dadosArea_boxAreaPonto{
+    width: 15px;
+    height: 15px;
+    background-color: #ffffff;
+    border-radius: 9999px;
+}
+
+.dadosArea_boxAreaPerson{
+    flex: 1;
+    display: flex;
+}
+
+.dadosArea_boxAreaPerson p{
+    width: 100%;
+    color: #5e5f5d;
+}
+
+.dadosArea_boxAreaButton {
+    width: 25px;
+    height: 25px;
+    border-radius: 100%;
+    border: 2px solid #7b7e79;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #fff;
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+}
+
+.exportarButton{
+    background-color: #fc8a38;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    color: #ffffff;
+    height: 45px;
+    width: 180px;
+    font-size: 18px;
+    padding: 6px;
+    border-radius: 8px;
+    font-size: 1.125rem;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+}
+
+.exportarButton:hover{
+    background-color: #e67a28;
+}
+
+.exportarButtonImage{
+    height: 30px;
+    width: 30px;
+}

@@ -1,0 +1,186 @@
+/* ===============  OVERLAY ESCURECIDO  =============== */
+.cadastroOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999 !important; /* Sempre acima de tudo */
+}
+
+/* ===============  MODAL CENTRAL  =============== */
+.cadastroModal {
+  width: 60%;
+  max-width: 700px;
+  height: 80%;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 15px;
+  animation: popIn 0.25s ease;
+  border: 2px solid #fc8a38;
+  z-index: 100;
+  overflow-y: hidden;
+}
+
+/* Animação suave */
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Cabeçalho */
+.cadastroModal_header {
+  height: 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.cadastroModal_header h2 {
+  font-size: 24px;
+  color: #fc8a38;
+}
+
+/* Botão X */
+.cadastroModal_close {
+  background: none;
+  border: none;
+  font-size: 28px;
+  color: #fc8a38;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.cadastroModal_close:hover {
+  color: #d96e22;
+}
+
+/* Conteúdo */
+.cadastroModal_content {
+  display: flex;
+  width: 100%;
+  height: calc(100% - 120px);
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: auto;
+  padding-bottom: 10px;
+}
+
+.cadastroModal_item{
+  display: flex;
+  flex-direction: column;
+}
+
+.cadastroModal_item label {
+  font-weight: bold;
+  color: #555;
+}
+
+.cadastroModal_item p {
+  padding: 10px;
+  background: #fff;
+  border: 1px solid #fc8a38;
+  border-radius: 8px;
+  color: #444;
+  min-height: 45px;
+  height: auto;
+}
+
+.cadastroModal_item input {
+  padding: 10px;
+  background: #fff;
+  border: 1px solid #fc8a38;
+  border-radius: 8px;
+  color: #444;
+  height: 45px;
+}
+
+.cadastroModal_item select {
+  padding: 10px;
+  background: #fff;
+  border: 1px solid #fc8a38;
+  border-radius: 8px;
+  color: #444;
+  height: 45px;
+}
+
+/* MOBILE */
+@media (max-width: 767px) {
+  .cadastroModal {
+    width: 90%;
+    padding: 20px;
+  }
+}
+
+.cadastroModal_buttons{
+  height: 80px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap:20px;
+}
+
+.cadastroModal_buttonsEditar{
+  background-color: #fc8a38;
+  color: #ffffff;
+  height: 45px;
+  width: 180px;
+  font-size: 18px;
+  padding: 6px;
+  border-radius: 8px;
+  font-size: 1.125rem;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+  cursor: pointer;
+}
+
+.cadastroModal_buttonsFinalizar{
+  background-color: #15ca15;
+  color: #ffffff;
+  height: 45px;
+  width: 180px;
+  font-size: 18px;
+  padding: 6px;
+  border-radius: 8px;
+  font-size: 1.125rem;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+  cursor: pointer;
+}
+
+.cadastroModal_buttonsExcluir{
+  background-color: #e62626;
+  color: #ffffff;
+  height: 45px;
+  width: 180px;
+  font-size: 18px;
+  padding: 6px;
+  border-radius: 8px;
+  font-size: 1.125rem;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+  cursor: pointer;
+}
+
+.cadastroModal_buttonsEditar:hover{
+  background-color: rgba(230, 122, 40, 0.788);
+}
+
+.cadastroModal_buttonsFinalizar:hover{
+  background-color: #15ca15b2;
+}
+
+.cadastroModal_buttonsExcluir:hover{
+  background-color: #e62626d3;
+}

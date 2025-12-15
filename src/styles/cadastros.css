@@ -1,0 +1,160 @@
+.cadastros{
+    height: 100vh;
+    width: 100vw;
+    padding-top: 100px;
+    padding-left: 250px;
+    overflow: hidden;
+    padding-bottom: 10px;
+}
+
+@media (max-width: 767px){
+    .cadastros{
+        padding-left: 0px !important;
+        overflow-y: auto !important;
+    }
+
+    .pesquisaArea{
+        flex-direction: column;
+        justify-content: center !important;
+        align-items: center !important;
+        padding-right: 20px !important;
+        padding-left: 20px !important;
+    }
+
+    .pesquisaArea_div{
+        width: 100% !important;
+    }
+
+    .dadosAreaCadastros{
+        height: auto;
+        width: 100%;
+        padding-right: 10px !important;
+        padding-left: 10px !important;
+    }
+
+    .dadosArea_boxCadastros{
+        width: 100%;
+        overflow-x:hidden;
+    }
+ 
+    .cadastrosTitulo{
+        text-align: center;
+    }
+}
+
+.cadastrosTitulo{
+    padding-left: 5%;
+    margin-top: 20px;
+    color: "#000";
+    font-size: 25px;
+    
+}
+
+.pesquisaArea{
+    height: auto;
+    margin-top: 30px;
+    display: flex;
+    padding-right: 12%;
+    margin-left: 0%;
+    gap: 50px;
+}
+
+.pesquisaArea_div{
+    width: 50%;
+}
+
+.pesquisaArea_div_label{
+    font-size: 18px;
+}
+
+.pesquisaArea_div_input{
+    width: 100%;                 
+    background-color: #ffffff;       
+    border-bottom: 2px solid #fc8a38;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    padding: 16px 0px;             
+    outline: none;                   
+    font-size: 1rem;
+}
+
+.dadosAreaCadastros{
+    max-height: 380px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    padding-right: 10%;
+    padding-left: 5%;
+    overflow-y: hidden;
+}
+
+.dadosArea_boxCadastros{
+    border: 2px solid #fc8a38;
+    max-height: 100%;
+    overflow-y: auto;
+    padding: 5px;
+    margin-bottom: 15px;
+}
+
+.dadosArea_boxAreaCadastros{
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.dadosArea_boxAreaDataCadastros{
+    background-color: #ededed;
+    border-radius: 12px;
+    height: 45px;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.dadosArea_boxAreaButton {
+    width: 25px;
+    height: 25px;
+    border-radius: 100%;
+    border: 2px solid #7b7e79;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #fff;
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+}
+
+.dadosArea_boxAreaButtonSelect {
+    width: 25px;
+    height: 25px;
+    border-radius: 100%;
+    border: 2px solid #7b7e79;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease;
+    background-color: #fc8a38;
+    cursor: pointer;
+}
+
+.dadosArea_boxAreaPonto{
+    width: 15px;
+    height: 15px;
+    background-color: #ffffff;
+    border-radius: 9999px;
+}
+
+.dadosArea_boxAreaPersonCadastros{
+    flex: 1;
+    display: flex;
+    width: 25px;
+}
+
+.dadosArea_boxAreaPersonCadastros p{
+    width: 100%;
+    color: #5e5f5d;
+}

@@ -1,0 +1,69 @@
+.bodyAlert{
+    z-index: 200;
+    width: 100vw;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    position:fixed;
+    background-color: rgba(68, 68, 68, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+@Media (max-width: 767px){
+    .boxAlert{
+        width: 90% !important;
+    }
+}
+
+.boxAlert{
+    height: 50%;
+    width: 30%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background-color: #fff;
+    color: #000;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 20px;
+    margin: 5px;
+}
+
+.boxAlertText{
+    height: 100%;
+    width: 80%;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: end;
+    padding-bottom: 15px;
+    font-size: 25px;
+}
+
+.boxButtonAlerts{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: start;
+    gap: 20px;
+    height: 100%;
+    padding-top: 15px;
+}
+
+.buttonAlerts{
+    height: 45px;
+    width: 180px;
+    padding: 5px;
+    border-radius: 10px;
+    color: #fff;
+    outline: none;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 15px;
+    border: solid 1px;
+}

@@ -1,0 +1,42 @@
+@Media (max-width: 767px){
+    .menuTopo{
+        display: flex !important;
+        width: 50px;
+        margin-left: 3%;
+    }
+
+    .contentTopo_name{
+        display: none;
+    }
+}
+
+.contentTopo{
+    background-color: #7B7E79;
+    width: 100vw;
+    height: 100px;
+    top:0;
+    left: 0;
+    z-index: 100;
+    position: fixed;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.menuTopo{
+    display: none;
+}
+
+.contentTopo_name{
+    color: #FC8A38;
+    font-size: 30px;
+    font-weight: bold;
+    margin-left: 5%;
+}
+
+.contentTopo_profile{
+    width: 80px;
+    margin-right: 3%;
+    cursor: pointer;
+}
