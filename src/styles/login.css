@@ -8,13 +8,13 @@
 /* Lado esquerdo */
 .left {
   width: 50%;
-  position: relative;
   background: #0000;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
   overflow: hidden;
+  border: solid 1px;
 }
 
 /* Círculo grande */
@@ -55,17 +55,25 @@
 /* Texto no centro */
 .title-box {
   z-index: 10;
+  justify-content: center;
+  align-items: center;
   text-align: center;
+  color: #fc8a38;
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+  width: 100%;
+  height: 100%;
 }
 
 .title {
-  font-size: 55px;
+  font-size: 80px;
   font-weight: bold;
-  margin-top: -150px;
+  /* margin-top: -150px; */
 }
 
 .subtitle {
-  font-size: 40px;
+  font-size: 50px;
   font-weight: 600;
 }
 

@@ -44,13 +44,13 @@ export default async function handler(
     // POST → Criar usuário
     if (req.method === "POST" && action === "create") {
       const { nome, email, telefone, endereco, senha, tipo } = req.body;
-
+      
       // Verificar email duplicado
       const [exists]: any = await connection.query(
         `SELECT ID FROM usuario WHERE Email = ?`,
         [email]
       );
-
+      console.log(exists.length)
       if (exists.length > 0) {
         connection.release();
         return res

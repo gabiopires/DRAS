@@ -82,9 +82,9 @@ export default function Login() {
       {showAlerts&&<Alerta dataAlert={dataAlerts}/>}
       {/* Lado esquerdo */}
       <div className="left">
-        <div className="circle-big"></div>
+        {/* <div className="circle-big"></div>
         <div className="circle-small"></div>
-        <div className="circle-orange"></div>
+        <div className="circle-orange"></div> */}
 
         <div className="title-box">
           <h1 className="title">DRAS</h1>

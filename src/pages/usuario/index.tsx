@@ -75,7 +75,7 @@ export default function Cadastrar() {
     }
 
     try {
-      const resposta = await fetch("http://localhost:3000/api/apiUsuario?action=create", {
+      const resposta = await fetch("/api/apiUsuario?action=create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
