@@ -1,8 +1,9 @@
 import { TypePessoa } from "../../../components/type";
 import { useState, useEffect } from "react";
 import Alerta from "../../../components/alerta/Alerta";
+
 interface Props {
-  pessoa: TypePessoa;
+  pessoa?: TypePessoa | null;
   onClose: () => void;
 }
 
@@ -15,26 +16,26 @@ let dataAlerts = {
 export default function CadastroIndividual({ pessoa, onClose }: Props) {
 
   const [edit, setEdit] = useState(false);
-  const [nome, setNome] = useState(pessoa.nome);
-  const [referenciaFamiliar, setReferenciaFamiliar] = useState(pessoa.referenciaFamiliar);
-  const [endereco, setEndereco] = useState(pessoa.endereco);
-  const [identificacao, setIdentificacao] = useState(pessoa.identificacao);
-  const [territorioId, setTerritorioId] = useState(pessoa.idTerritorio);
-  const [centroSaude, setCentroSaude] = useState(pessoa.centroSaude);
-  const [sexo, setSexo] = useState(pessoa.sexo);
-  const [deficiencia, setDeficiencia] = useState(pessoa.deficiencia);
-  const [situacaoRua, setSituacaoRua] = useState(pessoa.situacaoRua);
-  const [categoriaId, setCategoriaId] = useState(pessoa.idCategoria);
-  const [tecnicoId, setTecnicoId] = useState(pessoa.idTecnicoResponsavel);
-  const [acolhimento, setAcolhimento] = useState(pessoa.acolhimentoInstitucional);
-  const [orgaoEncaminhador, setOrgaoEncaminhador] = useState(pessoa.orgaoEncaminhador);
-  const [referencia, setReferencia] = useState(pessoa.referencia);
-  const [idVulnerabilidade, setIdVulnerabilidade] = useState(pessoa.idVulnerabilidade);
-  const [idViolacao, setIdViolacao] = useState(pessoa.idViolacao);
-  const [idEncaminhamento, setIdEncaminhamento] = useState(pessoa.idEncaminhamento);
-  const [sigps, setSigps] = useState(pessoa.sigps);
-  const [dilacao, setDilacao] = useState(pessoa.dilacao)
-  const [dataDilacao, setDataDilacao] = useState(pessoa.dataDilacao)
+  const [nome, setNome] = useState(pessoa?.nome ?? "");
+  const [referenciaFamiliar, setReferenciaFamiliar] = useState(pessoa?.referenciaFamiliar ?? "");
+  const [endereco, setEndereco] = useState(pessoa?.endereco ?? "");
+  const [identificacao, setIdentificacao] = useState(pessoa?.identificacao ?? -1);
+  const [territorioId, setTerritorioId] = useState(pessoa?.idTerritorio ?? -1);
+  const [centroSaude, setCentroSaude] = useState(pessoa?.centroSaude ?? "");
+  const [sexo, setSexo] = useState(pessoa?.sexo ?? "");
+  const [deficiencia, setDeficiencia] = useState(pessoa?.deficiencia ?? "");
+  const [situacaoRua, setSituacaoRua] = useState(pessoa?.situacaoRua ?? "");
+  const [categoriaId, setCategoriaId] = useState(pessoa?.idCategoria ?? -1);
+  const [tecnicoId, setTecnicoId] = useState(pessoa?.idTecnicoResponsavel ?? -1);
+  const [acolhimento, setAcolhimento] = useState(pessoa?.acolhimentoInstitucional ?? "");
+  const [orgaoEncaminhador, setOrgaoEncaminhador] = useState(pessoa?.orgaoEncaminhador ?? "");
+  const [referencia, setReferencia] = useState(pessoa?.referencia);
+  const [idVulnerabilidade, setIdVulnerabilidade] = useState(pessoa?.idVulnerabilidade ?? -1);
+  const [idViolacao, setIdViolacao] = useState(pessoa?.idViolacao ?? -1);
+  const [idEncaminhamento, setIdEncaminhamento] = useState(pessoa?.idEncaminhamento ?? -1);
+  const [sigps, setSigps] = useState(pessoa?.sigps ?? "");
+  const [dilacao, setDilacao] = useState(pessoa?.dilacao ?? "")
+  const [dataDilacao, setDataDilacao] = useState(pessoa?.dataDilacao ?? "")
   const [dataCategorias, setDataCategorias] = useState<{id: string; descricao: string}[]>([]);
   const [dataVulnerabilidade, setDataVulnerabilidade] = useState<{id: string, descricao: string}[]>([]);
   const [dataViolacao, setDataViolacao] = useState<{id: string, descricao: string}[]>([]);
@@ -240,7 +241,7 @@ export default function CadastroIndividual({ pessoa, onClose }: Props) {
         situacaoRua: situacaoRua, categoria: categoriaId, tecnico: tecnicoId, 
         acolhimento: acolhimento, orgaoEncaminhador: orgaoEncaminhador, referencia: referencia,
         vulnerabilidade: idVulnerabilidade, violacao: idViolacao,encaminhamento: idEncaminhamento, sigps: sigps,
-        dilacao: dilacao, dataDilacao: dataDilacao, idPessoa: pessoa.idPessoa, idAtendimento: pessoa.idAtendimento
+        dilacao: dilacao, dataDilacao: dataDilacao, idPessoa: pessoa?.idPessoa, idAtendimento: pessoa?.idAtendimento
       };
       const response=await fetch(endpont,{method: "PUT", cache: "reload", headers: { "Content-Type": "application/json", }, body: JSON.stringify(bodyData) })
       const data = await response.json();
@@ -274,7 +275,7 @@ export default function CadastroIndividual({ pessoa, onClose }: Props) {
   async function finalizar(){
     try{
       const endpont = `/api/apiCadastrar?action=finalizar`;
-      const bodyData = { finalizar: "Sim", idAtendimento: pessoa.idAtendimento };
+      const bodyData = { finalizar: "Sim", idAtendimento: pessoa?.idAtendimento };
       const response=await fetch(endpont,{method: "PUT", cache: "reload", headers: { "Content-Type": "application/json", }, body: JSON.stringify(bodyData) })
       const data = await response.json();
       if(response.status === 201){
@@ -307,7 +308,7 @@ export default function CadastroIndividual({ pessoa, onClose }: Props) {
   async function excluir(){
     try{
       const endpont = `/api/apiCadastrar?action=excluir`;
-      const bodyData = { idPessoa: pessoa.idPessoa, idAtendimento: pessoa.idAtendimento };
+      const bodyData = { idPessoa: pessoa?.idPessoa, idAtendimento: pessoa?.idAtendimento };
       const response=await fetch(endpont,{method: "DELETE", cache: "reload", headers: { "Content-Type": "application/json", }, body: JSON.stringify(bodyData) })
       const data = await response.json();
       if(response.status === 201){
@@ -403,11 +404,11 @@ export default function CadastroIndividual({ pessoa, onClose }: Props) {
           
           <div className="cadastroModal_item">
             <label>Data de Recebimento</label>
-            <p>{editDateTime(pessoa.dataRecebimento)}</p>
+            <p>{editDateTime(pessoa?.dataRecebimento ?? "")}</p>
           </div>
           <div className="cadastroModal_item">
             <label>Prazo Final Previsto do Atendimento</label>
-            <p>{pessoa.fimPrevistoAtendimento == null ? "" : editDateTime(pessoa.fimPrevistoAtendimento)}</p>
+            <p>{pessoa?.fimPrevistoAtendimento == null ? "" : editDateTime(pessoa?.fimPrevistoAtendimento)}</p>
           </div>
           <div className="cadastroModal_item">
             <label>Dilação</label>
@@ -454,7 +455,7 @@ export default function CadastroIndividual({ pessoa, onClose }: Props) {
                 ))}
               </select>
             :
-              <p>{pessoa.territorio}</p>
+              <p>{pessoa?.territorio}</p>
             }
           </div>
           <div className="cadastroModal_item">
@@ -508,7 +509,7 @@ export default function CadastroIndividual({ pessoa, onClose }: Props) {
                 ))}
               </select>
             :
-              <p>{pessoa.categoria}</p>
+              <p>{pessoa?.categoria}</p>
             }
           </div>
 
@@ -528,7 +529,7 @@ export default function CadastroIndividual({ pessoa, onClose }: Props) {
                 ))}
               </select>
             :
-              <p>{pessoa.tecnicoResponsavel}</p>
+              <p>{pessoa?.tecnicoResponsavel}</p>
             }
           </div>
           <div className="cadastroModal_item">
@@ -548,7 +549,7 @@ export default function CadastroIndividual({ pessoa, onClose }: Props) {
                 ))}
               </select>
             :
-              <p>{pessoa.encaminhamento}</p>
+              <p>{pessoa?.encaminhamento}</p>
             }
           </div>
           <div className="cadastroModal_item">
@@ -568,7 +569,7 @@ export default function CadastroIndividual({ pessoa, onClose }: Props) {
                 ))}
               </select>
             :
-              <p>{pessoa.vulnerabilidade}</p>
+              <p>{pessoa?.vulnerabilidade}</p>
             }
           </div>
           <div className="cadastroModal_item">
@@ -580,7 +581,7 @@ export default function CadastroIndividual({ pessoa, onClose }: Props) {
                 ))}
               </select>
             :
-              <p>{pessoa.violacao}</p>
+              <p>{pessoa?.violacao}</p>
             }
           </div>
           <div className="cadastroModal_item">

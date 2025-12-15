@@ -1,116 +1,137 @@
-import React, { useEffect, useRef } from 'react';
-import { Chart, registerables } from 'chart.js';
-import ChartDataLabels from 'chartjs-plugin-datalabels';
-import { generateDynamicColors } from '../../utils/colorUtils';
+import React, { useEffect, useMemo, useRef } from "react";
+import {
+  Chart,
+  registerables,
+  type ChartData,
+  type ChartOptions,
+  type TooltipItem,
+} from "chart.js";
+import ChartDataLabels from "chartjs-plugin-datalabels";
+import { generateDynamicColors } from "../../utils/colorUtils";
 
 interface ChartDataSet {
-    labels: string[];
-    data: number[];
-}
-// Tipagem para as propriedades do componente
-interface GraficoPizzaProps {
-    data: ChartDataSet | null; // Agora aceita os dados dinâmicos
+  labels: string[];
+  data: number[];
 }
 
-// Incluímos o plugin ChartDataLabels para mostrar os valores nas fatias.
+interface GraficoPizzaProps {
+  data: ChartDataSet | null;
+}
+
 Chart.register(...registerables, ChartDataLabels);
 
-// O componente PieChart em TypeScript
 const ChartPizza: React.FC<GraficoPizzaProps> = ({ data }) => {
+  // Hooks SEMPRE no topo (regra de ouro)
+  const chartRef = useRef<HTMLCanvasElement>(null);
+  const chartInstance = useRef<Chart<"doughnut"> | null>(null);
 
-    // Se não houver dados, retorna uma mensagem (fallback)
-    if (!data || data.labels.length === 0) {
-        return <p className="text-gray-500 text-center py-10">Dados de relatório indisponíveis.</p>;
+  const labels = data?.labels ?? [];
+  const values = data?.data ?? [];
+  const hasData = labels.length > 0;
+
+  const colors = useMemo(() => {
+    return generateDynamicColors(labels.length, 0.6);
+  }, [labels.length]);
+
+  const chartData: ChartData<"doughnut"> = useMemo(() => {
+    return {
+      labels,
+      datasets: [
+        {
+          label: "Número de Pacientes",
+          data: values,
+          borderWidth: 1,
+          backgroundColor: colors.backgroundColors,
+          borderColor: colors.borderColors,
+        },
+      ],
+    };
+  }, [labels, values, colors.backgroundColors, colors.borderColors]);
+
+  const chartOptions: ChartOptions<"doughnut"> = useMemo(() => {
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: "right",
+          labels: {
+            font: { size: 14 },
+          },
+        },
+        datalabels: {
+          color: "#4B5563",
+          font: {
+            weight: "bold",
+            size: 14,
+          },
+          formatter: (value: number, context) => {
+            // Tipagem segura: data do dataset é (number | null)[] em alguns cenários
+            const dataArr = context.chart.data.datasets?.[0]?.data ?? [];
+            const total = (dataArr as Array<number | null | undefined>).reduce<number>(
+                (acc, v) => acc + (typeof v === "number" ? v : 0),
+                0
+            );
+
+
+            if (!total) return String(value);
+
+            const percentage = ((value / total) * 100).toFixed(1) + "%";
+            return `${value} - ${percentage}`;
+          },
+          anchor: "end",
+          align: "end",
+          offset: 5,
+        },
+      },
+    };
+  }, []);
+
+  useEffect(() => {
+    // Hook roda sempre, mas só cria chart se tiver dados
+    if (!hasData) return;
+
+    const canvas = chartRef.current;
+    if (!canvas) return;
+
+    if (chartInstance.current) {
+      chartInstance.current.destroy();
+      chartInstance.current = null;
     }
 
-    //Chamada da Função para Gerar Cores
-    const { backgroundColors, borderColors } = generateDynamicColors(data.labels.length, 0.6); // 0.6 é a opacidade (alpha)
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
 
-    // Referências do React para o canvas e a instância do gráfico
-    const chartRef = useRef<HTMLCanvasElement>(null);
-    const chartInstance = useRef<Chart | null>(null);
+    chartInstance.current = new Chart(ctx, {
+      type: "doughnut",
+      data: chartData,
+      options: chartOptions,
+    });
 
-// Dados DINÂMICOS do gráfico
-    const chartData = {
-        // Usa os dados recebidos via prop
-        labels: data.labels, 
-        datasets: [{
-            label: 'Número de Pacientes',
-            data: data.data, // Usa os dados recebidos via prop
-            borderWidth: 1,
-            // Usando as cores dinâmicas geradas
-            backgroundColor: backgroundColors,
-            borderColor: borderColors,
-        }]
+    return () => {
+      if (chartInstance.current) {
+        chartInstance.current.destroy();
+        chartInstance.current = null;
+      }
     };
+  }, [hasData, chartData, chartOptions]);
 
-    const chartOptions = {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            // Configuração da legenda para gráficos de pizza
-            legend: {
-                position: 'right' as const, // Coloca a legenda à direita
-                labels: {
-                    font: {
-                        size: 14,
-                    }
-                }
-            },
-            // Configuração do plugin de rótulos de dados para mostrar valores/porcentagens
-            datalabels: {
-                color: '#4B5563',
-                //'#fff', // Cor do texto dos rótulos (branco para maior contraste)
-                font: {
-                    weight: 'bold' as const,
-                    size: 14,
-                },
-                formatter: (value: number, context: any) => {
-                    const total = context.chart.data.datasets[0].data.reduce((a: number, b: number) => a + b, 0);
-                    const percentage = ((value / total) * 100).toFixed(1) + '%';
-                    return  value + " - " + percentage; // Exibe a quantidade e a porcentagem
-                },
-                // Posiciona os rótulos um pouco para fora do centro
-                anchor: 'end' as const,
-                align: 'end' as const,
-                offset: 5,
-            }
-        }
-    };
-
-    // useEffect para a lógica de criação e destruição do gráfico
-    useEffect(() => {
-        if (chartRef.current) {
-            // Destrói a instância anterior para evitar problemas de re-renderização
-            if (chartInstance.current) {
-                chartInstance.current.destroy();
-            }
-
-            const ctx = chartRef.current.getContext('2d');
-            
-            if (ctx) {
-                // MUDANÇA PRINCIPAL: type: 'pie'
-                chartInstance.current = new Chart(ctx, {
-                    type: 'doughnut', 
-                    data: chartData,
-                    options: chartOptions,
-                });
-            }
-        }
-
-        // Função de limpeza
-        return () => {
-            if (chartInstance.current) {
-                chartInstance.current.destroy();
-            }
-        };
-    }, [data, backgroundColors, borderColors]); // Reexecuta se os dados ou cores mudarem
-
+  if (!hasData) {
     return (
-        <div className="w-full max-w-4xl mx-auto p-4 bg-white rounded-lg shadow-lg" style={{ height: '300px' }}>
-            <canvas ref={chartRef}></canvas>
-        </div>
+      <p className="text-gray-500 text-center py-10">
+        Dados de relatório indisponíveis.
+      </p>
     );
+  }
+
+  return (
+    <div
+      className="w-full max-w-4xl mx-auto p-4 bg-white rounded-lg shadow-lg"
+      style={{ height: "300px" }}
+    >
+      <canvas ref={chartRef} />
+    </div>
+  );
 };
 
 export default ChartPizza;

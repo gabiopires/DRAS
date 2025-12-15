@@ -2,7 +2,7 @@ import { useState } from "react";
 import Alerta from "../alerta/Alerta";
 import { TypeDataAlerts, ImportResult } from "../type";
 
-let dataAlerts: TypeDataAlerts = {
+const dataAlerts: TypeDataAlerts = {
     alertText: "",
     alertButtons: [],
     alertsCommans: [],

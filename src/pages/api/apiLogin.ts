@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-console */
 import type { NextApiRequest, NextApiResponse } from "next";
 import pool from "../../../components/db";
 

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-console */
 import type { NextApiRequest, NextApiResponse } from "next";
 import pool from '../../../components/db';
 
@@ -170,6 +172,7 @@ export default async function Cadastrar(req: NextApiRequest, res: NextApiRespons
             return res.status(201).json("Ok")
           }else{
             const [rowsPessoa]: any[] = await connection.query(`DELETE FROM pessoa WHERE id = ?`,[idPessoa]);
+            console.log(rowsPessoa)
             connection.release();
             return res.status(500).json({ message: "Erro interno do servidor" });
           }
@@ -197,7 +200,7 @@ export default async function Cadastrar(req: NextApiRequest, res: NextApiRespons
           dataRecebimento, acolhimento, "Não", null, orgaoEncaminhador, referencia, sigps, pessoaId, prazoAtendimento, encaminhamento,
           tecnico, violacao, vulnerabilidade, fimPrevisto
         ]);
-
+        console.log(rowsAtendimento)
         connection.release();
         return res.status(201).json("Ok")
       }catch(error){
@@ -224,7 +227,7 @@ export default async function Cadastrar(req: NextApiRequest, res: NextApiRespons
           nome, endereco, referenciaFamiliar, centroSaude, deficiencia, situacaoRua, sexo,
           identificacao, categoria, territorio, idPessoa
         ]);
-
+        console.log(rowsPessoa)
         const [rowsAtendimento]: any[] = await connection.query(`
           UPDATE atendimento SET
             acolhimentoInstitucional = ?, dilacao = ?, dataDilacao = ?, orgaoEncaminhador = ?, referencia = ?, sigps = ?, 
@@ -233,7 +236,7 @@ export default async function Cadastrar(req: NextApiRequest, res: NextApiRespons
           acolhimento, dilacao, dataDilacao, orgaoEncaminhador, referencia, sigps, encaminhamento,
           tecnico, violacao, vulnerabilidade, idAtendimento
         ]);
-
+        console.log(rowsAtendimento)
         connection.release();
         return res.status(201).json("Ok")
       }catch(error){
@@ -244,6 +247,7 @@ export default async function Cadastrar(req: NextApiRequest, res: NextApiRespons
       try{
         const connection = await pool.getConnection();
         const [rowsAtendimento]: any[] = await connection.query(`UPDATE atendimento SET finalizado = ? WHERE id = ?`,[finalizar, idAtendimento]);
+        console.log(rowsAtendimento)
         connection.release();
         return res.status(201).json("Ok")
       }catch(error){
@@ -258,7 +262,7 @@ export default async function Cadastrar(req: NextApiRequest, res: NextApiRespons
         const connection = await pool.getConnection();
         
         const [rowsAtendimento]: any[] = await connection.query(`DELETE FROM atendimento WHERE id = ?`,[idAtendimento]);
-        
+        console.log(rowsAtendimento)
         connection.release();
         return res.status(201).json("Ok")
       }catch(error){
