@@ -21,7 +21,7 @@ export default function CadastroIndividual({ pessoa, onClose }: Props) {
   const [endereco, setEndereco] = useState(pessoa?.endereco ?? "");
   const [identificacao, setIdentificacao] = useState(pessoa?.identificacao ?? -1);
   const [territorioId, setTerritorioId] = useState(pessoa?.idTerritorio ?? -1);
-  const [centroSaude, setCentroSaude] = useState(pessoa?.centroSaude ?? "");
+  const [centroSaude, setCentroSaude] = useState(pessoa?.idCentroSaude ?? -1);
   const [sexo, setSexo] = useState(pessoa?.sexo ?? "");
   const [deficiencia, setDeficiencia] = useState(pessoa?.deficiencia ?? "");
   const [situacaoRua, setSituacaoRua] = useState(pessoa?.situacaoRua ?? "");
@@ -42,6 +42,7 @@ export default function CadastroIndividual({ pessoa, onClose }: Props) {
   const [dataTecnico, setDataTecnico] = useState<{id: string, nome: string}[]>([]);
   const [dataTerritorios, setDataTerritorio] = useState<{id: string, descricao: string}[]>([]);
   const [dataEncaminhamento, setDataEncaminhamento] = useState<{id: string, descricao: string}[]>([]);
+  const [dataCentroSaude, setDataCentroSaude] = useState<{id: string, descricao: string}[]>([]);
   const [permissao, setPermissao] = useState<string>("");
   const [showAlerts,setshowAlerts]= useState(false);
 
@@ -65,6 +66,7 @@ export default function CadastroIndividual({ pessoa, onClose }: Props) {
         setDataTecnico(data.tecnicoResponsavel)
         setDataViolacao(data.violacao)
         setDataEncaminhamento(data.encaminhamento);
+        setDataCentroSaude(data.centroSaude)
       }else if (response.status === 401){
         setshowAlerts(true)
         dataAlerts = {
@@ -142,7 +144,7 @@ export default function CadastroIndividual({ pessoa, onClose }: Props) {
         alertButtons: ["Ok"],
         alertsCommans: [()=>{setshowAlerts(false)}]
       }
-    }else if(centroSaude == ""){
+    }else if(centroSaude == -1){
       setshowAlerts(true)
       dataAlerts = {
         alertText: "Digite um centro de saúde",
@@ -461,7 +463,11 @@ export default function CadastroIndividual({ pessoa, onClose }: Props) {
           <div className="cadastroModal_item">
             <label>Centro de Saúde</label>
             {edit?
-              <input type="text" placeholder="Digite o centro de saúde" value={centroSaude} onChange={(evt)=>{setCentroSaude(evt.target.value)}}></input>
+              <select className="pesquisaArea2_div_select" value={centroSaude} onChange={(e) => {setCentroSaude(Number(e.target.value))}}>
+                {dataCentroSaude.map((t, index)=>(
+                  <option key={index} value={t.id}>{t.descricao}</option>
+                ))}
+              </select>
             :
               <p>{centroSaude}</p>
             }

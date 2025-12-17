@@ -221,7 +221,7 @@ export default async function Cadastrar(req: NextApiRequest, res: NextApiRespons
         const connection = await pool.getConnection();
         const [rowsPessoa]: any[] = await connection.query(`
           UPDATE pessoa SET
-            nome = ?, endereco = ?, referenciaFamiliar = ?, centroSaude = ?, deficiencia = ?, situacaoRua = ?, sexo = ?, 
+            nome = ?, endereco = ?, referenciaFamiliar = ?, id_centroSaude = ?, deficiencia = ?, situacaoRua = ?, sexo = ?, 
             identificacao = ?, id_categoriaUsuario = ?, id_territorio = ?
           WHERE id = ?`, [
           nome, endereco, referenciaFamiliar, centroSaude, deficiencia, situacaoRua, sexo,
