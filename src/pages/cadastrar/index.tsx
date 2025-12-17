@@ -15,36 +15,36 @@ let dataAlerts = {
 
 export default function Cadastrar() {
 
-  const [pessoaId, setPessoaId] = useState(-1)
+  const [pessoaId, setPessoaId] = useState(1)
   const [nome, setNome] = useState('');
   const [referenciaFamiliar, setReferenciaFamiliar] = useState('');
   const [endereco, setEndereco] = useState('');
   const [nomeSearch, setNomeSearch] = useState('');
   const [referenciaFamiliarSearch, setReferenciaFamiliarSearch] = useState('');
   const [enderecoSearch, setEnderecoSearch] = useState('');
-  const [selectedIds, setSelectedIds] = useState(-1);
+  const [selectedIds, setSelectedIds] = useState( 1);
   const [searchResults, setSearchResults] = useState<TypePessoa[]>([]);
   const [personSelect, setPersonSelect] = useState(false);
   const [page, setPage] = useState(1);
   const [cadastro, setCadastro] = useState(false);
   const [identificacao, setIdentificacao] = useState("");
-  const [tipoIdentificacao, setTipoIdentificacao] = useState(-1);
-  const [territorio, setTerritorio] = useState(-1);
-  const [centroSaude, setCentroSaude] = useState(-1);
+  const [tipoIdentificacao, setTipoIdentificacao] = useState(1);
+  const [territorio, setTerritorio] = useState(1);
+  const [centroSaude, setCentroSaude] = useState(1);
   const [sexo, setSexo] = useState("");
   const [deficiencia, setDeficiencia] = useState("");
   const [situacaoRua, setSituacaoRua] = useState("");
-  const [categoria, setCategoria] = useState(-1);
+  const [categoria, setCategoria] = useState(1);
   const [dataRecebimento, setDataRecebimento] = useState("");
-  const [tecnico, setTecnico] = useState(-1);
+  const [tecnico, setTecnico] = useState(1);
   const [acolhimento, setAcolhimento] = useState("");
   const [orgaoEncaminhador, setOrgaoEncaminhador] = useState("");
   const [referencia, setReferencia] = useState("");
-  const [vulnerabilidade, setVulnerabilidade] = useState(-1);
-  const [violacao, setViolacao] = useState(-1);
-  const [encaminhamento, setEncaminhamento] = useState(-1);
+  const [vulnerabilidade, setVulnerabilidade] = useState(1);
+  const [violacao, setViolacao] = useState(1);
+  const [encaminhamento, setEncaminhamento] = useState(1);
   const [sigps, setSigps] = useState("");
-  const [prazoAtendimento, setPrazoAtendimento] = useState(-1);
+  const [prazoAtendimento, setPrazoAtendimento] = useState(1);
   const [fimPrevisto, setFimPrevisto] = useState("");
   const [dataCategorias, setDataCategorias] = useState<{id: string; descricao: string}[]>([]);
   const [dataVulnerabilidade, setDataVulnerabilidade] = useState<{id: string, descricao: string}[]>([]);
@@ -411,13 +411,6 @@ export default function Cadastrar() {
         alertButtons: ["Ok"],
         alertsCommans: [()=>{setshowAlerts(false)}]
       }
-    }else if(territorio == -1){
-      setshowAlerts(true)
-      dataAlerts = {
-        alertText: "Selecione um territorio",
-        alertButtons: ["Ok"],
-        alertsCommans: [()=>{setshowAlerts(false)}]
-      }
     }else if(sexo == ""){
       setshowAlerts(true)
       dataAlerts = {
@@ -446,13 +439,6 @@ export default function Cadastrar() {
         alertButtons: ["Ok"],
         alertsCommans: [()=>{setshowAlerts(false)}]
       }
-    }else if(centroSaude == -1){
-      setshowAlerts(true)
-      dataAlerts = {
-        alertText: "Digite um centro de saúde. Caso não possua, digite: sem centro de saúde",
-        alertButtons: ["Ok"],
-        alertsCommans: [()=>{setshowAlerts(false)}]
-      }
     }else if(deficiencia == ""){
       setshowAlerts(true)
       dataAlerts = {
@@ -467,13 +453,6 @@ export default function Cadastrar() {
         alertButtons: ["Ok"],
         alertsCommans: [()=>{setshowAlerts(false)}]
       } 
-    }else if(categoria == -1){
-      setshowAlerts(true)
-      dataAlerts = {
-        alertText: "Selecione uma categoria.",
-        alertButtons: ["Ok"],
-        alertsCommans: [()=>{setshowAlerts(false)}]
-      }
     }else if(dataRecebimento == ""){
       setshowAlerts(true)
       dataAlerts = {
@@ -481,13 +460,6 @@ export default function Cadastrar() {
         alertButtons: ["Ok"],
         alertsCommans: [()=>{setshowAlerts(false)}]
       }
-    }else if(tecnico == -1){
-      setshowAlerts(true)
-      dataAlerts = {
-        alertText: "Selecione um técnico responsável para o atendimento.",
-        alertButtons: ["Ok"],
-        alertsCommans: [()=>{setshowAlerts(false)}]
-      } 
     }else if(acolhimento == ""){
       setshowAlerts(true)
       dataAlerts = {
@@ -509,38 +481,10 @@ export default function Cadastrar() {
         alertButtons: ["Ok"],
         alertsCommans: [()=>{setshowAlerts(false)}]
       }
-    }else if(vulnerabilidade == -1){
-      setshowAlerts(true)
-      dataAlerts = {
-        alertText: "Selecione uma vulnerabilidade",
-        alertButtons: ["Ok"],
-        alertsCommans: [()=>{setshowAlerts(false)}]
-      }
-    }else if(violacao == -1){
-      setshowAlerts(true)
-      dataAlerts = {
-        alertText: "Selecione uma violação",
-        alertButtons: ["Ok"],
-        alertsCommans: [()=>{setshowAlerts(false)}]
-      }
-    }else if(encaminhamento == -1){
-      setshowAlerts(true)
-      dataAlerts = {
-        alertText: "Selecione o encaminhamento",
-        alertButtons: ["Ok"],
-        alertsCommans: [()=>{setshowAlerts(false)}]
-      }
     }else if(sigps == ""){
       setshowAlerts(true)
       dataAlerts = {
         alertText: "Digite um SIGPS. Caso não possua, digite: sem SIGPS",
-        alertButtons: ["Ok"],
-        alertsCommans: [()=>{setshowAlerts(false)}]
-      }
-    }else if(prazoAtendimento == -1){
-      setshowAlerts(true)
-      dataAlerts = {
-        alertText: "Selecione um prazo para atendimento",
         alertButtons: ["Ok"],
         alertsCommans: [()=>{setshowAlerts(false)}]
       }
