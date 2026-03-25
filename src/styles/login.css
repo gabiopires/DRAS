@@ -1,17 +1,15 @@
 /* Container geral */
-.container {
-  width: 100%;
+.containerLogin{
+  width: 100vw;
   height: 100vh;
   display: flex;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-direction: column;
 }
 
 @Media (max-width: 767px){
-  .container {
-    flex-direction: column;
-  }
 
   .login-title{
     display: none !important;
@@ -21,51 +19,28 @@
     width: 100% !important;
     justify-content: start !important;
   }
+
+  .input-group{
+    width: 80% !important;
+  }
+
+  .right-text-box {
+    margin-top: 0% !important;
+  }
+
+  .btn-login {
+    width: 80% !important;
+  }
 }
 
 /* Lado esquerdo */
 .left {
-  width: 50%;
-  background: #0000;
+  width: 100%;
+  height: 50%;
+  background-color: #7B7E79;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-}
-
-/* Círculo grande */
-.circle-big {
-  position: absolute;
-  left: -120px;
-  top: -120px;
-  width: 600px;
-  height: 600px;
-  background: gray;
-  border-radius: 50%;
-}
-
-/* Círculo pequeno */
-.circle-small {
-  position: absolute;
-  bottom: -50px;
-  left: -40px;
-  width: 300px;
-  height: 300px;
-  background: #e5e5e5;
-  border-radius: 50%;
-  box-shadow: 0 0 20px #00000030;
-}
-
-/* Círculo laranja */
-.circle-orange {
-  position: absolute;
-  left: 250px;
-  bottom: 120px;
-  width: 180px;
-  height: 180px;
-  background: #fc8a38;
-  border-radius: 50%;
-  box-shadow: 0 0 20px #00000030;
 }
 
 /* Texto no centro */
@@ -74,7 +49,7 @@
   justify-content: center;
   align-items: center;
   text-align: center;
-  color: #fc8a38;
+  color: #ff8026;
   display: flex;
   flex-direction: column;
   line-height: 1;
@@ -95,41 +70,66 @@
 
 /* Lado direito */
 .right {
-  width: 50%;
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
+  justify-content: start;
+  align-items: center;
+}
+
+.right-text-box {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  padding-right: 100px;
+  margin-bottom: 30px;
+  margin-top: 55px;
+}
+
+.right-text-box p {
+  font-size: 15px;
+  color: #000;
 }
 
 .login-title {
   font-size: 48px;
   font-weight: bold;
   color: #fc8a38; 
-  margin-bottom: 40px;
+  margin-bottom: 20px;
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
+.input-group {
+  width: 35%;
+  height: 55px; 
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f0f0f0;
+  border-radius: 12px;
+
+}
+
 /* Inputs */
 .input-group input {
   width: 100%;
-  height: 45px;
+  height: 55px;
   padding: 12px 14px;
-  background: #f0f0f0;
-  border-radius: 12px;
   border: none;
   font-size: 15px;
-  color: #555;
-  margin-bottom: 22px;
+  color: #000;
   box-sizing: border-box;
 }
 
 /* Botão */
 .btn-login {
-  width: 100%;
+  width: 35%;
   padding: 15px 0;
   background: #fc8a38;
   color: white;
@@ -139,10 +139,11 @@
   font-weight: bold;
   cursor: pointer;
   transition: 0.3s;
+  margin-top: 40px;
 }
 
 .btn-login:hover {
-  background: #fc8a38;
+  background: #ff9d5c;
 }
 
 /* Texto "Não é cadastrado?" */

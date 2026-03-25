@@ -3,99 +3,109 @@ import { useRouter } from "next/router";
 import Image from "next/image";
 import Alerta from "../../components/alerta/Alerta";
 
-let dataAlerts = {
-  alertText: "",
-  alertButtons: [""],
-  alertsCommans: [(()=> {})],
-}
-
 export default function Login() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
-  const [showAlerts,setshowAlerts]= useState(false);
+  const [mostrar, setMostrar] = useState(false);
   const router = useRouter();
 
-  const [mostrar, setMostrar] = useState(false);
+  // Novo estado agrupado para gerenciar os alertas de forma limpa e nativa do React
+  const [alertConfig, setAlertConfig] = useState({
+    show: false,
+    text: "",
+    buttons: [""],
+    commands: [() => {}],
+  });
+
   const toggleMostrar = () => setMostrar(!mostrar);
+
+  // Função auxiliar para fechar o alerta
+  const fecharAlerta = () => setAlertConfig({ ...alertConfig, show: false });
 
   // Função de login
   const LoginUser = async () => {
     if (!email || !senha) {
-      setshowAlerts(true)
-      dataAlerts = {
-        alertText: "Preencha usuário e senha!",
-        alertButtons: ["Ok"],
-        alertsCommans: [()=>{setshowAlerts(false)}]
-      }
+      setAlertConfig({
+        show: true,
+        text: "Preencha usuário e senha!",
+        buttons: ["Ok"],
+        commands: [fecharAlerta],
+      });
       return;
     }
 
     try {
-      const endpoint = `/api/apiLogin?action=login&email=${email}&senha=${senha}`;
+      // O endpoint agora é limpo, sem expor os dados na URL
+      const endpoint = `/api/apiLogin`; // Ajuste para o nome exato do seu arquivo de rota
 
       const response = await fetch(endpoint, {
-        method: "GET",
+        method: "POST", // Mudamos para POST
+        headers: {
+          "Content-Type": "application/json", // Avisa a API que estamos enviando JSON
+        },
+        body: JSON.stringify({ email, senha }), // Os dados vão escondidos e seguros no body
       });
 
       const data = await response.json();
 
       if (response.status === 200) {
-        // SALVAR ID DO USUÁRIO LOGADO
-        localStorage.setItem("userId", data.usuario.id);
-        localStorage.setItem("permissão", data.usuario.tipo);
-        setshowAlerts(true)
-        dataAlerts = {
-          alertText: "Login realizado com sucesso!",
-          alertButtons: ["Ok"],
-          alertsCommans: [()=>{setshowAlerts(false);router.push("/cadastros")}]
-        }
+        router.push("/cadastrar");
       } 
       else if (response.status === 401) {
-        setshowAlerts(true)
-        dataAlerts = {
-          alertText: "E-mail ou senha incorretos!",
-          alertButtons: ["Ok"],
-          alertsCommans: [()=>{setshowAlerts(false)}]
-        }
+        setAlertConfig({
+          show: true,
+          text: data.message || "E-mail ou senha incorretos!",
+          buttons: ["Ok"],
+          commands: [fecharAlerta],
+        });
       } 
       else {
-        setshowAlerts(true)
-        dataAlerts = {
-          alertText: "Erro inesperado no servidor. Tente novamente mais tarde",
-          alertButtons: ["Ok"],
-          alertsCommans: [()=>{setshowAlerts(false)}]
-        }
+        setAlertConfig({
+          show: true,
+          text: "Erro inesperado no servidor. Tente novamente mais tarde.",
+          buttons: ["Ok"],
+          commands: [fecharAlerta],
+        });
       }
     } catch (error) {
-      console.log(error);
-      setshowAlerts(true)
-      dataAlerts = {
-        alertText: "Erro inesperado no servidor. Tente novamente mais tarde",
-        alertButtons: ["Ok"],
-        alertsCommans: [()=>{setshowAlerts(false)}]
-      }
+      console.error(error);
+      setAlertConfig({
+        show: true,
+        text: "Erro inesperado ao conectar com o servidor.",
+        buttons: ["Ok"],
+        commands: [fecharAlerta],
+      });
     }
   };
 
   return (
-    <div className="container">
-      {showAlerts&&<Alerta dataAlert={dataAlerts}/>}
+    <div className="containerLogin">
+      {/* Passando as props corretamente para o componente de Alerta */}
+      {alertConfig.show && (
+        <Alerta 
+          dataAlert={{
+            alertText: alertConfig.text,
+            alertButtons: alertConfig.buttons,
+            alertsCommans: alertConfig.commands
+          }} 
+        />
+      )}
+
       {/* Lado esquerdo */}
       <div className="left">
-        {/* <div className="circle-big"></div>
-        <div className="circle-small"></div>
-        <div className="circle-orange"></div> */}
-
         <div className="title-box">
           <h1 className="title">DRAS</h1>
-          <p className="subtitle">automático</p>
+          <h2 className="subtitle" style={{ color: '#fff' }}>Login</h2>
         </div>
       </div>
 
       {/* Lado direito */}
       <div className="right">
-        <h2 className="login-title">Login</h2>
-
+        <div className="right-text-box">
+          <p>Informe seu e-mail e sua senha. Caso não tenha cadastro procure</p>
+          <p>um administrador do sistema</p>
+        </div>
+        
         <div className="input-group">
           <input
             type="text"
@@ -105,7 +115,7 @@ export default function Login() {
           />
         </div>
 
-        <div className="input-group" style={{ position: "relative" }}>
+        <div className="input-group">
           <input
             type={mostrar ? "text" : "password"}
             placeholder="Senha"
@@ -113,33 +123,18 @@ export default function Login() {
             onChange={(e) => setSenha(e.target.value)}
             style={{ paddingRight: "40px" }}
           />
-
           <Image
             onClick={toggleMostrar}
             alt="mostrar/esconder"
             height={50}
             width={50}
             src="./images/eye_icon.svg"
-            style={{
-              position: "absolute",
-              right: "10px",
-              top: "35%",
-              transform: "translateY(-50%)",
-              cursor: "pointer",
-            }}
+            style={{ cursor: "pointer" }}
           />
         </div>
-
         <button onClick={LoginUser} className="btn-login">
           Entrar
         </button>
-
-        <p
-          className="register-text"
-          onClick={() => router.push("/usuario")}
-        >
-          Não é cadastrado? <span>Cadastre-se aqui</span>
-        </p>
       </div>
     </div>
   );

@@ -5,7 +5,9 @@ import { TypePessoa, ExcelRow, ApiPayload, ImportResult } from "../../../compone
 import Alerta from "../../../components/alerta/Alerta";
 import * as XLSX from "xlsx";
 import { useRouter } from "next/router";
-import Import from "../../../components/import/Import"
+import Import from "../../../components/import/Import";
+import { GetServerSideProps } from 'next';
+import jwt from 'jsonwebtoken';
 
 let dataAlerts = {
   alertText: "",
@@ -65,17 +67,7 @@ export default function Cadastrar() {
   useEffect(()=>{
     const data = editDate();
     setDataRecebimento(data);
-    const perm = localStorage.getItem("permissão");
-    if(!perm){
-      setshowAlerts(true)
-      dataAlerts = {
-        alertText: "Redirecionando para o login",
-        alertButtons: ["Ok"],
-        alertsCommans: [()=>{setshowAlerts(false);router.push("/");}]
-      } 
-    }else{
-      initData();
-    }
+    initData();
   },[])
 
   const initData = async () =>{

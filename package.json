@@ -10,8 +10,10 @@
   },
   "dependencies": {
     "chartjs-plugin-datalabels": "^2.2.0",
+    "cookie": "^1.1.1",
     "crypto-js": "^4.2.0",
     "dotenv": "^17.2.3",
+    "jsonwebtoken": "^9.0.3",
     "mysql2": "^3.15.3",
     "next": "^16.0.10",
     "react": "19.1.0",
@@ -21,6 +23,8 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@types/cookie": "^0.6.0",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

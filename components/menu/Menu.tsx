@@ -38,12 +38,17 @@ export default function Menu(props: MenuProps) {
         }
     }
 
-    function deslogar(){
-        localStorage.removeItem("id");
-        localStorage.removeItem("permissão");
-        localStorage.removeItem("userId");
-        router.push("/");
-    }
+    const deslogar = async () => {
+        try {
+            //Chama a API para destruir o cookie
+            await fetch('/api/apiLogout', { method: 'POST' });
+            
+            //Redireciona para a tela de login
+            router.push("/");
+        } catch (error) {
+            console.error("Erro ao fazer logout", error);
+        }
+    };
 
     return (
         <div className={showMenu == true ? "contentLeft" : "content"}>

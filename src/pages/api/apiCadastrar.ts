@@ -2,10 +2,23 @@
 /* eslint-disable no-console */
 import type { NextApiRequest, NextApiResponse } from "next";
 import pool from '../../../components/db';
+import jwt from 'jsonwebtoken';
 
 export default async function Cadastrar(req: NextApiRequest, res: NextApiResponse){
 
+  const token = req.cookies.auth_token;
   const { nome, referencia, endereco, action } = req.query;
+
+  if (!token) {
+    return res.status(401).json({ message: "Acesso não autorizado. Faça login." });
+  }
+
+  try {
+    const JWT_SECRET = process.env.JWT_SECRET || 'uma_chave_secreta_muito_longa_e_segura';
+    jwt.verify(token, JWT_SECRET);
+  } catch (error) {
+    return res.status(401).json({ message: "Token inválido ou expirado." });
+  }
 
   if(req.method === "GET"){
     if (action == "search"){
