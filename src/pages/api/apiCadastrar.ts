@@ -4,27 +4,33 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import pool from '../../../components/db';
 import jwt from 'jsonwebtoken';
 
-export default async function Cadastrar(req: NextApiRequest, res: NextApiResponse){
-
+export default async function Cadastrar(req: NextApiRequest, res: NextApiResponse) {
   const token = req.cookies.auth_token;
-  const { nome, referencia, endereco, action } = req.query;
+  const { action } = req.query;
 
+  //Validação de Autenticação
   if (!token) {
     return res.status(401).json({ message: "Acesso não autorizado. Faça login." });
   }
 
+  let usuarioLogado: any;
   try {
-    const JWT_SECRET = process.env.JWT_SECRET || 'uma_chave_secreta_muito_longa_e_segura';
-    jwt.verify(token, JWT_SECRET);
+    const JWT_SECRET = String(process.env.JWT_SECRET);
+    usuarioLogado = jwt.verify(token, JWT_SECRET);
   } catch (error) {
     return res.status(401).json({ message: "Token inválido ou expirado." });
   }
 
-  if(req.method === "GET"){
-    if (action == "search"){
-      try{
-        const connection = await pool.getConnection();
-        const [rows]:any[] = await connection.query(`
+  let connection;
+
+  try {
+    connection = await pool.getConnection();
+
+    //MÉTODOS GET
+    if (req.method === "GET") {
+      if (action === "search") {
+        const { nome, endereco, referencia } = req.query;
+        const [rows]: any[] = await connection.query(`
           SELECT ate.id AS idAtendimento,
             ate.dataRecebimento,
             ate.acolhimentoInstitucional,
@@ -76,214 +82,144 @@ export default async function Cadastrar(req: NextApiRequest, res: NextApiRespons
             AND p.endereco LIKE CONCAT('%', ?, '%')
             AND p.referenciaFamiliar LIKE CONCAT('%', ?, '%')
           ORDER BY ABS(DATEDIFF(ate.fimPrevistoAtendimento, NOW())) ASC;
-          ;`,[nome, endereco, referencia]
-        );
-        connection.release();
-        if (Array.isArray(rows) && rows.length > 0) {
-          const person = rows
-          const dataReturn = { person }
-          return res.status(200).json(dataReturn)
-        }
-      }catch(error){
-        console.error("Erro na API de login:", error);
-        return res.status(500).json({ message: "Erro interno do servidor" });
-      }
-    }else if(action == "getInitData"){
-      try{
-        const connection = await pool.getConnection();
-        const [rowsTerritorio]:any[] = await connection.query(`
-          SELECT * FROM territorio;
-          ;`,[]
-        );
-        const [rowsCategoria]:any[] = await connection.query(`
-          SELECT * FROM categoriaUsuario;
-          ;`,[]
-        );
-        const [rowsVulnerabilidade]:any[] = await connection.query(`
-          SELECT * FROM tiposVulnerabilidade;
-          ;`,[]
-        );
-        const [rowsViolacao]:any[] = await connection.query(`
-          SELECT * FROM tiposViolacao;
-          ;`,[]
-        );
-        const [rowsTecnico]:any[] = await connection.query(`
-          SELECT * FROM tecnicoResponsavel;
-          ;`,[]
-        );
-        const [rowsEncaminhamento]:any[] = await connection.query(`
-          SELECT * FROM encaminhamento;
-          ;`,[]
-        );
-        const [rowsPrazo]:any[] = await connection.query(`
-          SELECT * FROM prazoAtendimento;
-          ;`,[]
-        );
-        const [rowsIdentificacao]:any[] = await connection.query(`
-          SELECT * FROM tiposIdentificacao;
-          ;`,[]
-        );
-        const [rowsCentroSaude]:any[] = await connection.query(`
-          SELECT * FROM tiposCentroSaude;
-          ;`,[]
-        );
-        connection.release();
-        if (Array.isArray(rowsCategoria) && rowsCategoria.length > 0) {
-          const dataReturn = { 
-            territorios:  rowsTerritorio,
-            categorias: rowsCategoria,
-            vulnerabilidades: rowsVulnerabilidade,
-            violacao: rowsViolacao,
-            tecnicoResponsavel: rowsTecnico,
-            encaminhamento: rowsEncaminhamento,
-            prazoAtendimento: rowsPrazo,
-            tiposIdentificacao: rowsIdentificacao,
-            centroSaude: rowsCentroSaude
-          }
-          return res.status(200).json(dataReturn)
-        }
-      }catch(error){
-        console.error("Erro na API de login:", error);
-        return res.status(500).json({ message: "Erro interno do servidor" });
-      }
-    }
-  }else if (req.method === "POST"){
-    const { nome, territorio, sexo,identificacao,endereco,referenciaFamiliar,centroSaude,deficiencia,
-      situacaoRua, categoria, dataRecebimento, tecnico, acolhimento, orgaoEncaminhador, referencia,
-      vulnerabilidade, violacao,encaminhamento, sigps, prazoAtendimento, fimPrevisto, pessoaId, tipoIdentificacao
-    } = req.body;
-
-
-    if (action == "cadastrar"){
-      let idPessoa: any;
-      try{
+          ;`, [nome, endereco, referencia]);
         
-        const connection = await pool.getConnection();
-        const [rowsPessoa]: any[] = await connection.query(`
-          INSERT INTO pessoa (
-            nome, identificacao, endereco, sexo, referenciaFamiliar, deficiencia, situacaoRua,  
-            id_categoriaUsuario, id_territorio, id_tiposIdentificacao, id_centroSaude
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
-          nome, identificacao, endereco, sexo, referenciaFamiliar, deficiencia, situacaoRua, 
-          categoria, territorio, tipoIdentificacao, centroSaude
+        connection.release();
+        return res.status(200).json({ person: rows });
+
+      }else if(action === "getInitData") {
+        const [ [territorios], [categorias], [vulnerabilidades], [violacao], [tecnicoResponsavel], [encaminhamento], [prazoAtendimento], [tiposIdentificacao], [centroSaude]] =
+        await Promise.all([
+          connection.query(`SELECT * FROM territorio`),
+          connection.query(`SELECT * FROM categoriaUsuario`),
+          connection.query(`SELECT * FROM tiposVulnerabilidade`),
+          connection.query(`SELECT * FROM tiposViolacao`),
+          connection.query(`SELECT * FROM tecnicoResponsavel`),
+          connection.query(`SELECT * FROM encaminhamento`),
+          connection.query(`SELECT * FROM prazoAtendimento`),
+          connection.query(`SELECT * FROM tiposIdentificacao`),
+          connection.query(`SELECT * FROM tiposCentroSaude`)
         ]);
 
-        if(rowsPessoa.insertId && (rowsPessoa.affectedRows > 0)){
-          idPessoa = rowsPessoa.insertId;
+        connection.release();
+        return res.status(200).json({
+          territorios, categorias, vulnerabilidades, violacao, tecnicoResponsavel,
+          encaminhamento, prazoAtendimento, tiposIdentificacao, centroSaude
+        });
+      }
+    }
 
-          const [rowsAtendimento]: any[] = await connection.query(`
+    //MÉTODOS POST
+    else if (req.method === "POST") {
+      const { nome, territorio, sexo, identificacao, endereco, referenciaFamiliar, centroSaude, deficiencia, situacaoRua, categoria, dataRecebimento, tecnico, acolhimento, orgaoEncaminhador, 
+        referencia, vulnerabilidade, violacao, encaminhamento, sigps, prazoAtendimento, fimPrevisto, pessoaId, tipoIdentificacao 
+      } = req.body;
+
+      //cADASTRO DE UM NOVO PACIENTE
+      if (action === "cadastrar") {
+        await connection.beginTransaction();
+
+        try {
+          const [rowsPessoa]: any = await connection.query(`
+            INSERT INTO pessoa ( nome, identificacao, endereco, sexo, referenciaFamiliar, deficiencia, situacaoRua, id_categoriaUsuario, id_territorio, id_tiposIdentificacao, id_centroSaude
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, 
+            [nome, identificacao, endereco, sexo, referenciaFamiliar, deficiencia, situacaoRua, categoria, territorio, tipoIdentificacao, centroSaude]
+          );
+
+          const idPessoa = rowsPessoa.insertId;
+
+          await connection.query(`
             INSERT INTO atendimento (
               dataRecebimento, acolhimentoInstitucional, dilacao, dataDilacao, orgaoEncaminhador, referencia, sigps, 
               id_pessoa, id_prazoAtendimento, id_encaminhamento, id_tecnicoResponsavel, id_violacao, id_tiposVulnerabilidade, fimPrevistoAtendimento
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
-            dataRecebimento, acolhimento, "Não", null, orgaoEncaminhador, referencia, sigps, idPessoa, prazoAtendimento, encaminhamento,
-            tecnico, violacao, vulnerabilidade, fimPrevisto
-          ]);
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, 
+            [dataRecebimento, acolhimento, "Não", null, orgaoEncaminhador, referencia, sigps, idPessoa, prazoAtendimento, encaminhamento, tecnico, violacao, vulnerabilidade, fimPrevisto]
+          );
 
-          if(rowsAtendimento.insertId && (rowsAtendimento.affectedRows > 0)){
-            connection.release();
-            return res.status(201).json("Ok")
-          }else{
-            const [rowsPessoa]: any[] = await connection.query(`DELETE FROM pessoa WHERE id = ?`,[idPessoa]);
-            console.log(rowsPessoa)
-            connection.release();
-            return res.status(500).json({ message: "Erro interno do servidor" });
-          }
-          
-        }else{
+          // Se deu tudo certo, consolida as duas inserções no banco
+          await connection.commit();
           connection.release();
-          return res.status(500).json({ message: "Erro interno do servidor" });
-        }
+          return res.status(201).json("Ok");
 
-      }catch(error){
-        console.error("Erro na API de login:", error);
-        return res.status(500).json({ message: "Erro interno do servidor" });
+        } catch (transactionError) {
+          // Se qualquer um dos INSERTs falhar, desfaz tudo automaticamente
+          await connection.rollback();
+          throw transactionError;
+        }
+        
       }
-    }
-    
-    
-    else if (action == "cadastrarAtendimento"){
-      try{
-        const connection = await pool.getConnection();
-        const [rowsAtendimento]: any[] = await connection.query(`
+      //CADASTRO DE UM NOVO ATENDIMENTO PARA UM PACIENTE EXISTENTE
+      else if (action === "cadastrarAtendimento") {
+        await connection.query(`
           INSERT INTO atendimento (
             dataRecebimento, acolhimentoInstitucional, dilacao, dataDilacao, orgaoEncaminhador, referencia, sigps, 
             id_pessoa, id_prazoAtendimento, id_encaminhamento, id_tecnicoResponsavel, id_violacao, id_tiposVulnerabilidade, fimPrevistoAtendimento
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
-          dataRecebimento, acolhimento, "Não", null, orgaoEncaminhador, referencia, sigps, pessoaId, prazoAtendimento, encaminhamento,
-          tecnico, violacao, vulnerabilidade, fimPrevisto
-        ]);
-        console.log(rowsAtendimento)
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, 
+          [dataRecebimento, acolhimento, "Não", null, orgaoEncaminhador, referencia, sigps, pessoaId, prazoAtendimento, encaminhamento, tecnico, violacao, vulnerabilidade, fimPrevisto]
+        );
         connection.release();
-        return res.status(201).json("Ok")
-      }catch(error){
-        console.error("Erro na API de login:", error);
-        return res.status(500).json({ message: "Erro interno do servidor" });
+        return res.status(201).json("Ok");
       }
     }
-  }
-  
-  
-  else if (req.method === "PUT"){
-    const { nome, territorio, sexo,identificacao,endereco,referenciaFamiliar,centroSaude,deficiencia,
-      situacaoRua, categoria, tecnico, acolhimento, orgaoEncaminhador, referencia,
-      vulnerabilidade, violacao,encaminhamento, sigps, dilacao, dataDilacao, idPessoa, idAtendimento, finalizar
-    } = req.body;
-    if (action == "editar"){
-      try{
-        const connection = await pool.getConnection();
-        const [rowsPessoa]: any[] = await connection.query(`
-          UPDATE pessoa SET
-            nome = ?, endereco = ?, referenciaFamiliar = ?, id_centroSaude = ?, deficiencia = ?, situacaoRua = ?, sexo = ?, 
-            identificacao = ?, id_categoriaUsuario = ?, id_territorio = ?
-          WHERE id = ?`, [
-          nome, endereco, referenciaFamiliar, centroSaude, deficiencia, situacaoRua, sexo,
-          identificacao, categoria, territorio, idPessoa
-        ]);
-        console.log(rowsPessoa)
-        const [rowsAtendimento]: any[] = await connection.query(`
-          UPDATE atendimento SET
-            acolhimentoInstitucional = ?, dilacao = ?, dataDilacao = ?, orgaoEncaminhador = ?, referencia = ?, sigps = ?, 
-            id_encaminhamento = ?, id_tecnicoResponsavel = ?, id_violacao = ?, id_tiposVulnerabilidade = ?
-          WHERE id = ?`, [
-          acolhimento, dilacao, dataDilacao, orgaoEncaminhador, referencia, sigps, encaminhamento,
-          tecnico, violacao, vulnerabilidade, idAtendimento
-        ]);
-        console.log(rowsAtendimento)
+
+    // MÉTODO PUT
+    else if (req.method === "PUT") {
+      const { nome, territorio, sexo, identificacao, endereco, referenciaFamiliar, centroSaude, deficiencia, situacaoRua, categoria, tecnico, acolhimento, orgaoEncaminhador, referencia,
+        vulnerabilidade, violacao, encaminhamento, sigps, dilacao, dataDilacao, idPessoa, idAtendimento, finalizar
+      } = req.body;
+
+      //EDITA UM ATENDIMENTO EXISTENTE
+      if (action === "editar") {
+        await connection.query(`
+          UPDATE pessoa SET nome = ?, endereco = ?, referenciaFamiliar = ?, id_centroSaude = ?, deficiencia = ?, situacaoRua = ?, sexo = ?, identificacao = ?, id_categoriaUsuario = ?, id_territorio = ?
+          WHERE id = ?`, 
+          [nome, endereco, referenciaFamiliar, centroSaude, deficiencia, situacaoRua, sexo, identificacao, categoria, territorio, idPessoa]
+        );
+
+        await connection.query(`
+          UPDATE atendimento SET acolhimentoInstitucional = ?, dilacao = ?, dataDilacao = ?, orgaoEncaminhador = ?, referencia = ?, sigps = ?, id_encaminhamento = ?, id_tecnicoResponsavel = ?, id_violacao = ?, id_tiposVulnerabilidade = ?
+          WHERE id = ?`, 
+          [acolhimento, dilacao, dataDilacao, orgaoEncaminhador, referencia, sigps, encaminhamento, tecnico, violacao, vulnerabilidade, idAtendimento]
+        );
         connection.release();
-        return res.status(201).json("Ok")
-      }catch(error){
-        console.error("Erro na API de login:", error);
-        return res.status(500).json({ message: "Erro interno do servidor" });
-      }
-    }else if (action == "finalizar"){
-      try{
-        const connection = await pool.getConnection();
-        const [rowsAtendimento]: any[] = await connection.query(`UPDATE atendimento SET finalizado = ? WHERE id = ?`,[finalizar, idAtendimento]);
-        console.log(rowsAtendimento)
+        return res.status(201).json("Ok");
+
+      } 
+      //FINALIZA UM ATENDIMENTO EXISTENTE
+      else if (action === "finalizar") {
+        await connection.query(`UPDATE atendimento SET finalizado = ? WHERE id = ?`, [finalizar, idAtendimento]);
         connection.release();
-        return res.status(201).json("Ok")
-      }catch(error){
-        console.error("Erro na API de login:", error);
-        return res.status(500).json({ message: "Erro interno do servidor" });
+        return res.status(201).json("Ok");
       }
     }
-  }else if (req.method === "DELETE"){
-    const { idPessoa, idAtendimento } = req.body;
-    if (action == "excluir"){
-      try{
-        const connection = await pool.getConnection();
-        
-        const [rowsAtendimento]: any[] = await connection.query(`DELETE FROM atendimento WHERE id = ?`,[idAtendimento]);
-        console.log(rowsAtendimento)
+
+    // MÉTODO DELETE
+    else if (req.method === "DELETE") {
+      if (action === "excluir") {
+        //Apenas admins pode deletar
+        if (usuarioLogado.tipo !== 'Administrador') {
+          connection.release();
+          return res.status(403).json({ message: "Apenas admins podem excluir registros." });
+        }
+
+        //DELETA UM ATENDIMENTO EXISTENTE MAS NÃO DELETA UM PACIENTE
+        const { idAtendimento } = req.body;
+        await connection.query(`DELETE FROM atendimento WHERE id = ?`, [idAtendimento]);
         connection.release();
-        return res.status(201).json("Ok")
-      }catch(error){
-        console.error("Erro na API de login:", error);
-        return res.status(500).json({ message: "Erro interno do servidor" });
+        return res.status(200).json("Ok");
       }
     }
-  }else{
-    return res.status(405).json({ message: "Method unauthorized" });
+
+    connection.release();
+    // Se a rota/ação não foi encontrada
+    return res.status(400).json({ message: "Ação inválida ou método incorreto." });
+
+  } catch (error) {
+    console.error("Erro na API:", error);
+    return res.status(500).json({ message: "Erro interno do servidor" });
+  } finally {
+    if (connection) {
+      connection.release();
+    }
   }
 }

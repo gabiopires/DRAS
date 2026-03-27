@@ -3,7 +3,9 @@
   justify-content: center;
   align-items: center;
   padding: 24px;
-  margin-top: 120px;
+  margin-top: 110px;
+  height: 100%;
+  flex-direction: column;
 }
 
 @Media (max-width: 767px){
@@ -16,6 +18,26 @@
     width: 100% !important;
     margin-left: 0px !important;
   }
+}
+
+.togglePerfil{
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 24px;
+  gap: 20px;
+  padding-left: 190px;
+}
+
+.togglePerfil_perfil, .togglePerfil_cadastrar{
+  background-color: #f39c4a;
+  text-align: center;
+  padding: 12px 0px;
+  cursor: pointer;
+  width: 180px;
+  border-radius: 10px;
+  font-weight: bold;
+  color: white;
 }
 
 .perfilCard {
@@ -34,7 +56,7 @@
   margin-bottom: 18px;
 }
 
-.perfilForm {
+.perfilForm, .perfilNovoForm {
   width: 100%;
 }
 
@@ -104,6 +126,6 @@
   font-weight: 600;
 }
 
-.perfilEditButton:hover {
+.perfilEditButton:hover, .togglePerfil_perfil:hover, .togglePerfil_cadastrar:hover {
   background: #e8731d;
 }

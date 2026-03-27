@@ -6,8 +6,6 @@ import Alerta from "../../../components/alerta/Alerta";
 import * as XLSX from "xlsx";
 import { useRouter } from "next/router";
 import Import from "../../../components/import/Import";
-import { GetServerSideProps } from 'next';
-import jwt from 'jsonwebtoken';
 
 let dataAlerts = {
   alertText: "",

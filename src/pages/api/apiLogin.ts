@@ -4,9 +4,9 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import pool from "../../../components/db";
 import { serialize } from 'cookie';
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
 
 export default async function handler( req: NextApiRequest, res: NextApiResponse) {
-  //Login DEVE ser POST. Rejeita qualquer outra coisa.
   if (req.method !== "POST") {
     return res.status(405).json({ message: "Método não permitido. Utilize POST para login." });
   }
@@ -16,30 +16,41 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
   try {
     connection = await pool.getConnection();
 
-    //Extrai os dados do body, invisível na URL
     const { email, senha } = req.body;
 
     if (!email || !senha) {
+      connection.release();
       return res.status(400).json({ message: "E-mail e senha são obrigatórios." });
     }
 
-    // Busca o usuário no banco
+    //Busca o usuário pelo e-mail
     const [rows]: any = await connection.query(
-      `SELECT * FROM usuario WHERE Email = ? AND Senha = ? LIMIT 1`,
-      [email, senha]
+      `SELECT * FROM usuario WHERE Email = ? LIMIT 1`,
+      [email]
     );
 
-    // Se o array de retorno for vazio, usuário ou senha estão errados
+    // Se não encontrou o e-mail, retorna com erro
     if (rows.length === 0) {
-      return res.status(401).json({ message: "E-mail ou senha incorretos." });
+      connection.release();
+      return res.status(401).json({ message: "E-mail ou senha incorretos." }); 
     }
 
     const user = rows[0];
 
-    //Geração do Token JWT
-    const JWT_SECRET = process.env.JWT_SECRET || 'uma_chave_secreta_muito_longa_e_segura';
-    
-    //Guardamos o ID e o Tipo dentro do token (não guarde a senha aqui!)
+    //Compara a senha digitada em texto limpo com o hash salvo no banco
+    const senhaValida = await bcrypt.compare(senha, user.Senha);
+
+    if (!senhaValida) {
+      connection.release();
+      return res.status(401).json({ message: "E-mail ou senha incorretos." });
+    }
+
+    //Validando e salvando token de acesso
+    const JWT_SECRET = process.env.JWT_SECRET;
+    if (!JWT_SECRET) {
+      throw new Error("A variável de ambiente não está configurada.");
+    }
+
     const token = jwt.sign(
       { userId: user.ID, tipo: user.Tipo }, 
       JWT_SECRET, 
@@ -50,12 +61,12 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
       httpOnly: true, 
       secure: process.env.NODE_ENV === 'production', 
       sameSite: 'strict', 
-      maxAge: 60 * 30, // 60 segundos * 30 minutos = 1800 segundos
+      maxAge: 60 * 30, 
       path: '/', 
     });
 
-    //Envia o cookie para o navegador e retorna os dados não-sensíveis
     res.setHeader('Set-Cookie', cookie);
+    connection.release();
     return res.status(200).json({
       message: "Login realizado com sucesso!"
     });
@@ -64,8 +75,6 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
     console.error("Erro na API de login:", error);
     return res.status(500).json({ message: "Erro interno do servidor" });
   } finally {
-    //Prevenção de Vazamento: O 'finally' GARANTE que a conexão será fechada, 
-    // mesmo que um erro aconteça no meio do bloco 'try'
     if (connection) {
       connection.release();
     }
