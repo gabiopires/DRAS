@@ -1,0 +1,89 @@
+.primeiroAcesso{
+    height: 100vh;
+    width: 100vw;
+    padding-top: 100px;
+    padding-left: 250px;
+    overflow: hidden;
+}
+
+.cardPrimeiroAcesso{
+    z-index: 200;
+    width: 100vw;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    position:fixed;
+    background-color: rgba(68, 68, 68, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.boxRedefinirSenha{
+    height: 80%;
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background-color: #fff;
+    color: #000;
+    border-radius: 10px;
+    font-size: 20px;
+    margin: 5px;
+    gap:35px;
+}
+
+.boxRedefinirSenha_title{
+    width: 100%;
+    font-size: 20px;
+    color: #000;
+    text-align: center;
+    font-weight: bold;
+}
+
+.boxRedefinirSenha_inputs{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.boxRedefinirSenha_inputs div{
+    width: 350px;
+    border-bottom: 2px solid #fc8a38;
+    margin-bottom: 25px;
+    display: flex;
+}
+
+.boxRedefinirSenha_inputs input{
+    margin-top: 5px;
+    width: 90%;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    outline: none;                   
+    font-size: 18px;
+}
+
+.buttonRedefinirSenha{
+    background-color: #fc8a38;
+    color: #fff;
+    padding: 6px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    height: 45px;
+    width: 180px;
+    font-size: 18px;
+}
+
+.buttonRedefinirSenha:hover{
+    background-color: #e67a28;
+    transition: all 0.3s;
+}

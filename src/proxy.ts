@@ -25,5 +25,6 @@ export const config = {
     '/cadastrar/:path*',
     '/exportar/:path*',
     '/usuario/:path*',
+    '/primeiroAcesso/:path*',
   ],
 };

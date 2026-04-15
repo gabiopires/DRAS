@@ -50,8 +50,9 @@ export default function Login() {
 
       if (response.status === 200) {
         router.push("/cadastrar");
-      } 
-      else if (response.status === 401) {
+      }else if (response.status === 403 && data.novoUsuario === true) {
+        router.push("/primeiroAcesso");
+      }else if (response.status === 401) {
         setAlertConfig({
           show: true,
           text: data.message || "E-mail ou senha incorretos!",

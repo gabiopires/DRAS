@@ -45,6 +45,22 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
       return res.status(401).json({ message: "E-mail ou senha incorretos." });
     }
 
+    // =======================================================
+    // VERIFICAÇÃO DE PRIMEIRO ACESSO PARA REDEFINIÇÃO DE SENHA
+    // =======================================================
+    const SENHA_PADRAO = 'novoUsuario'; 
+
+    if (senha === SENHA_PADRAO) {
+      connection.release();
+      
+      // Retornamos 403 (Acesso Negado/Proibido no momento)
+      return res.status(403).json({ 
+        message: "Primeiro acesso detectado. Redefinição de senha obrigatória.",
+        novoUsuario: true,
+      });
+    }
+    // =======================================================
+
     //Validando e salvando token de acesso
     const JWT_SECRET = process.env.JWT_SECRET;
     if (!JWT_SECRET) {

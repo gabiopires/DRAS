@@ -1,7 +1,5 @@
 import Menu from "../../../components/menu/Menu";
 import React, { useState, useRef, useEffect } from "react";
-import Image from "next/image";
-import { useRouter } from "next/router";
 import Alerta from "../../../components/alerta/Alerta";
 
 let dataAlerts = {
@@ -16,14 +14,21 @@ export default function Perfil() {
   const [endereco, setEndereco] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const [senhaAnterior, setSenhaAnterior] = useState("");
+  const [novaSenha, setNovaSenha] = useState("");
   const [editando, setEditando] = useState(false);
   const [tipo, setTipo] = useState("");
-  const [viewPerfil,setViewPerfil]= useState(true);
+  const [viewPerfil,setViewPerfil]= useState("perfil");
   const [showAlerts,setshowAlerts]= useState(false);
+  const [HabilitarEditarSenha, setHabilitarEditarSenha] = useState(false);
   const firstInputRef = useRef<HTMLInputElement | null>(null);
+  const [novoUsuario, setNovoUsuario] = useState({ nome: "", telefone: "", endereco: "", email: ""});
 
   useEffect(()=>{
     carregarPerfil();
+    if (editando && firstInputRef.current) {
+      firstInputRef.current.focus();
+    }
   },[])
 
   async function carregarPerfil() {
@@ -38,7 +43,7 @@ export default function Perfil() {
         setEmail(data.user.Email);
         setSenha(data.user.Senha);
         setTipo(data.user.Tipo);
-        setViewPerfil(true);
+        setViewPerfil("perfil");
       }else if(resp.status === 404){
         setshowAlerts(true)
         dataAlerts = {
@@ -59,6 +64,65 @@ export default function Perfil() {
     }
   }
 
+  const mudarAba = (novaAba: string) => {
+    setViewPerfil(novaAba);
+    setEditando(false); 
+
+    if (novaAba === "todosPerfis") {
+      // Busca os dados dos perfis
+      carregarTodosPerfil(); 
+    }
+  };
+
+  async function carregarTodosPerfil() {
+
+  }
+
+  async function cadastrarPerfi() {
+    try {
+      const resp = await fetch(`/api/apiPerfil`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nome: novoUsuario.nome,
+          telefone: novoUsuario.telefone,
+          endereco: novoUsuario.endereco,
+          email: novoUsuario.email,
+        }),
+      });
+
+      if(resp.status === 201) {
+        setshowAlerts(true)
+        dataAlerts = {
+          alertText: "Perfil cadastrado com sucesso!",
+          alertButtons: ["Ok"],
+          alertsCommans: [()=>{setshowAlerts(false);window.location.reload();}]
+        }
+      }else if(resp.status === 400){
+        setshowAlerts(true)
+        dataAlerts = {
+          alertText: "E-mail informado já está em uso. Informe outro e-mail.",
+          alertButtons: ["Ok"],
+          alertsCommans: [()=>{setshowAlerts(false)}]
+        }
+      }else{
+        setshowAlerts(true)
+        dataAlerts = {
+          alertText: "Erro ao cadastrar perfil. Tente novamente mais tarde.",
+          alertButtons: ["Ok"],
+          alertsCommans: [()=>{setshowAlerts(false);window.location.reload();}]
+        }
+      }
+    } catch (error) {
+      setshowAlerts(true)
+      dataAlerts = {
+        alertText: "Erro ao cadastrar perfil. Tente novamente mais tarde.",
+        alertButtons: ["Ok"],
+        alertsCommans: [()=>{setshowAlerts(false);window.location.reload();}]
+      }
+    }
+  }
+
   // salvar dados atualizados
   const salvarAlteracoes = async () => {
     try {
@@ -70,7 +134,8 @@ export default function Perfil() {
           telefone,
           endereco,
           email,
-          senha,
+          senhaAnterior,
+          novaSenha
         }),
       });
 
@@ -79,14 +144,21 @@ export default function Perfil() {
         dataAlerts = {
           alertText: "Perfil atualizado com sucesso!",
           alertButtons: ["Ok"],
-          alertsCommans: [()=>{setshowAlerts(false)}]
+          alertsCommans: [()=>{setshowAlerts(false);window.location.reload();}]
+        }
+      }else if(resp.status === 400){
+        setshowAlerts(true)
+        dataAlerts = {
+          alertText: "Senha atual incorreta. Nenhum dado foi atualizado.",
+          alertButtons: ["Ok"],
+          alertsCommans: [()=>{setshowAlerts(false);window.location.reload();}]
         }
       }else{
         setshowAlerts(true)
         dataAlerts = {
           alertText: "Erro ao atualizar perfil. Tente novamente mais tarde.",
           alertButtons: ["Ok"],
-          alertsCommans: [()=>{setshowAlerts(false)}]
+          alertsCommans: [()=>{setshowAlerts(false);window.location.reload();}]
         }
       }
     } catch (error) {
@@ -94,7 +166,7 @@ export default function Perfil() {
       dataAlerts = {
         alertText: "Erro ao atualizar perfil. Tente novamente mais tarde.",
         alertButtons: ["Ok"],
-        alertsCommans: [()=>{setshowAlerts(false)}]
+        alertsCommans: [()=>{setshowAlerts(false);window.location.reload();}]
       }
     }
   };
@@ -114,23 +186,13 @@ export default function Perfil() {
   const handleBotaoNovo = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (editando) {
-      await salvarAlteracoes();
-    }
+    await cadastrarPerfi();
 
-    setEditando(!editando);
   };
 
-  // Focar no primeiro campo ao ativar edição
-  useEffect(() => {
-    if (editando && firstInputRef.current) {
-      firstInputRef.current.focus();
-    }
-  }, [editando]);
-
-  // Mostrar/esconder senha
-  const [mostrar, setMostrar] = useState(false);
-  const toggleMostrar = () => setMostrar(!mostrar);
+  function editarSenha() {
+    setHabilitarEditarSenha(true);
+  }
 
   return (
     <div>
@@ -139,149 +201,107 @@ export default function Perfil() {
       <div className="perfilWrapper">
         {tipo == 'Administrador' ?
           <div className="togglePerfil">
-            <div className="togglePerfil_perfil" onClick={()=>{setViewPerfil(true)}}>Meu Perfil</div>
-            <div className="togglePerfil_cadastrar" onClick={()=>{setViewPerfil(false)}}>Cadastrar Novo Perfil</div>
-            <div className="togglePerfil_cadastrar" onClick={()=>{setViewPerfil(false)}}>Visualizar Perfis</div>
+            <div className="togglePerfil_perfil" onClick={() => mudarAba("perfil")}>Meu Perfil</div>
+            <div className="togglePerfil_cadastrar" onClick={() => mudarAba("cadastrar")}>Cadastrar Novo Perfil</div>
+            <div className="togglePerfil_cadastrar" onClick={()=>{mudarAba("todosPerfis")}}>Visualizar Perfis</div>
           </div> : " "
         }
         <div className="perfilCard">
-          {viewPerfil ? <>
-            <div className="perfilIconWrap">
-              <Image
-                src="/images/account_circle_orange.svg"
-                alt="perfil"
-                width={110}
-                height={110}
-              />
-            </div>
+          {viewPerfil === "perfil" ? 
+          <>
             <form className="perfilForm" onSubmit={handleBotao}>
               <div className="perfilRow">
                 <div className="perfilField">
                   <label className="perfilLabel">Nome</label>
-                  <input
-                    ref={firstInputRef}
-                    className={`perfilInput ${editando ? "perfilInputAtivo" : ""}`}
-                    value={nome}
-                    disabled={!editando}
-                    onChange={(e) => setNome(e.target.value)}
-                  />
+                  <input ref={firstInputRef} className={`perfilInput ${editando ? "perfilInputAtivo" : ""}`} value={nome} disabled={!editando} onChange={(e) => setNome(e.target.value)} />
                 </div>
-
                 <div className="perfilField">
                   <label className="perfilLabel">Telefone</label>
-                  <input
-                    className={`perfilInput ${editando ? "perfilInputAtivo" : ""}`}
-                    value={telefone}
-                    disabled={!editando}
-                    onChange={(e) => setTelefone(e.target.value)}
-                  />
+                  <input className={`perfilInput ${editando ? "perfilInputAtivo" : ""}`} value={telefone} disabled={!editando} onChange={(e) => setTelefone(e.target.value)} />
                 </div>
               </div>
               <div className="perfilRowSingle">
                 <div className="perfilFieldFull">
                   <label className="perfilLabel">Endereço</label>
-                  <input
-                    className={`perfilInput ${editando ? "perfilInputAtivo" : ""}`}
-                    value={endereco}
-                    disabled={!editando}
-                    onChange={(e) => setEndereco(e.target.value)}
-                  />
+                  <input className={`perfilInput ${editando ? "perfilInputAtivo" : ""}`} value={endereco} disabled={!editando}  onChange={(e) => setEndereco(e.target.value)} />
                 </div>
               </div>
               <div className="perfilRow">
                 <div className="perfilField">
                   <label className="perfilLabel">E-mail</label>
-                  <input
-                    className={`perfilInput ${editando ? "perfilInputAtivo" : ""}`}
-                    value={email}
-                    disabled={!editando}
-                    onChange={(e) => setEmail(e.target.value)}
-                    type="email"
-                  />
+                  <input className={`perfilInput ${editando ? "perfilInputAtivo" : ""}`} value={email} disabled={!editando}  onChange={(e) => setEmail(e.target.value)} type="email" />
+                </div>
+                {editando == false ? <div className="perfilField" style={{ position: "relative" }}>
+                  <label className="perfilLabel">Senha</label>
+                  <input className={`perfilInput ${editando ? "perfilInputAtivo" : ""}`} value={senha} type={"password"} />
+                </div>: ""}
+              </div>
+              {HabilitarEditarSenha && <div className="perfilRow">
+                <div className="perfilField">
+                  <label className="perfilLabel">Digite sua senha atual</label>
+                  <input className={`perfilInput ${editando ? "perfilInputAtivo" : ""}`} value={senhaAnterior} onChange={(e)=> setSenhaAnterior(e.target.value)}/>
                 </div>
                 <div className="perfilField" style={{ position: "relative" }}>
-                  <label className="perfilLabel">Senha</label>
-                  <input
-                    className={`perfilInput ${editando ? "perfilInputAtivo" : ""}`}
-                    value={senha}
-                    disabled={!editando}
-                    onChange={(e) => setSenha(e.target.value)}
-                    type={mostrar ? "text" : "password"}
-                  />
-                  <Image
-                    onClick={toggleMostrar}
-                    alt="mostrar/esconder"
-                    height={40}
-                    width={40}
-                    src="/images/eye_icon.svg"
-                    style={{
-                      position: "absolute",
-                      right: "10px",
-                      top: "35%",
-                      transform: "translateY(-50%)",
-                      cursor: "pointer",
-                    }}
-                  />
+                  <label className="perfilLabel">Digite a nova senha</label>
+                  <input className={`perfilInput ${editando ? "perfilInputAtivo" : ""}`} value={novaSenha} onChange={(e)=> setNovaSenha(e.target.value)}/>
                 </div>
-              </div>
+              </div>}
               <div className="perfilButtonRow">
                 <button type="submit" className="perfilEditButton">
                   {editando ? "Salvar" : "Editar"}
                 </button>
+                {editando && (
+                  <>
+                    {HabilitarEditarSenha == false ? 
+                      <button className="perfilEditButton" type="button" onClick={()=>{editarSenha()}}>
+                        Editar Senha
+                      </button>
+                      :
+                      <button className="perfilEditButton" type="button" onClick={()=>{setEditando(false); setHabilitarEditarSenha(false); setNovaSenha(""); setSenhaAnterior("")}}>
+                        Cancelar
+                      </button>
+                      }
+                  </>
+                )}
               </div>
-            </form></> :
+            </form></> : viewPerfil === "cadastrar" ?
           <>
             <form className="perfilNovoForm" onSubmit={handleBotaoNovo}>
-              
               <div className="perfilRowSingle">
                 <div className="perfilField">
                   <label className="perfilLabel">Nome</label>
-                  <input
-                    ref={firstInputRef}
-                    className={`perfilInput ${editando ? "perfilInputAtivo" : ""}`}
-                    onChange={(e) => setNome(e.target.value)}
-                  />
+                  <input className={`perfilInput ${editando ? "perfilInputAtivo" : ""}`} value={novoUsuario.nome}  onChange={(e) => setNovoUsuario({...novoUsuario, nome: e.target.value})} />
                 </div>
               </div>
-              
               <div className="perfilRowSingle">
                 <div className="perfilField">
                   <label className="perfilLabel">Telefone</label>
-                  <input
-                    className={`perfilInput ${editando ? "perfilInputAtivo" : ""}`}
-                    onChange={(e) => setTelefone(e.target.value)}
-                  />
+                  <input className={`perfilInput ${editando ? "perfilInputAtivo" : ""}`} value={novoUsuario.telefone}  onChange={(e) => setNovoUsuario({...novoUsuario, telefone: e.target.value})} />
                 </div>
               </div>
-              
               <div className="perfilRowSingle">
                 <div className="perfilFieldFull">
                   <label className="perfilLabel">Endereço</label>
-                  <input
-                    className={`perfilInput ${editando ? "perfilInputAtivo" : ""}`}
-                    onChange={(e) => setEndereco(e.target.value)}
-                  />
+                  <input className={`perfilInput ${editando ? "perfilInputAtivo" : ""}`} value={novoUsuario.endereco}  onChange={(e) => setNovoUsuario({...novoUsuario, endereco: e.target.value})} />
                 </div>
               </div>
-              
               <div className="perfilRowSingle">
                 <div className="perfilField">
                   <label className="perfilLabel">E-mail</label>
-                  <input
-                    className={`perfilInput ${editando ? "perfilInputAtivo" : ""}`}
-                    onChange={(e) => setEmail(e.target.value)}
-                    type="email"
-                  />
+                  <input className={`perfilInput ${editando ? "perfilInputAtivo" : ""}`} value={novoUsuario.email}  onChange={(e) => setNovoUsuario({...novoUsuario, email: e.target.value})} />
                 </div>
               </div>
-                
               <div className="perfilButtonRow">
                 <button type="submit" className="perfilEditButton">
-                  Criar
+                  Cadastrar
                 </button>
               </div>
             </form>
-          </>}
+          </> :
+          <>
+
+          </>
+          }
         </div>
       </div>
     </div>
