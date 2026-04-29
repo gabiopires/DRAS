@@ -1,6 +1,7 @@
 import Menu from "../../../components/menu/Menu";
 import React, { useState, useRef, useEffect } from "react";
 import Alerta from "../../../components/alerta/Alerta";
+import Image from "next/image";
 
 let dataAlerts = {
   alertText: "",
@@ -22,6 +23,7 @@ export default function Perfil() {
   const [showAlerts,setshowAlerts]= useState(false);
   const [HabilitarEditarSenha, setHabilitarEditarSenha] = useState(false);
   const firstInputRef = useRef<HTMLInputElement | null>(null);
+  const [todosPerfis, setTodosPerfis] = useState<{ ID: number; Nome: string; Email: string; Telefone: string; Tipo: string; Ativo: number }[]>([]);
   const [novoUsuario, setNovoUsuario] = useState({ nome: "", telefone: "", endereco: "", email: ""});
 
   useEffect(()=>{
@@ -75,7 +77,34 @@ export default function Perfil() {
   };
 
   async function carregarTodosPerfil() {
-
+    try {
+      const resp = await fetch(`/api/apiPerfil?action=buscarTodos`);
+      const data = await resp.json();
+      if(resp.status === 200 && data.users) {
+        setTodosPerfis(data.users);
+      }else if(resp.status === 403){
+        setshowAlerts(true)
+        dataAlerts = {
+          alertText: "Acesso negado. Apenas administradores.",
+          alertButtons: ["Ok"],
+          alertsCommans: [()=>{setshowAlerts(false)}]
+        }
+      }else{
+        setshowAlerts(true)
+        dataAlerts = {
+          alertText: "Erro ao carregar perfis",
+          alertButtons: ["Ok"],
+          alertsCommans: [()=>{setshowAlerts(false)}]
+        }
+      }
+    }catch (error) {
+      setshowAlerts(true)
+      dataAlerts = {
+        alertText: "Erro ao carregar perfis",
+        alertButtons: ["Ok"],
+        alertsCommans: [()=>{setshowAlerts(false)}]
+      }
+    }
   }
 
   async function cadastrarPerfi() {
@@ -206,7 +235,7 @@ export default function Perfil() {
             <div className="togglePerfil_cadastrar" onClick={()=>{mudarAba("todosPerfis")}}>Visualizar Perfis</div>
           </div> : " "
         }
-        <div className="perfilCard">
+        <div className={viewPerfil === "todosPerfis" ? "perfilCardPerfis" : "perfilCard"}>
           {viewPerfil === "perfil" ? 
           <>
             <form className="perfilForm" onSubmit={handleBotao}>
@@ -299,7 +328,59 @@ export default function Perfil() {
             </form>
           </> :
           <>
+            {todosPerfis.length > 0 ? (
+              // ADICIONE ESTA DIV POR FORA DA TABELA
+              <div className="dadosAreaCadastrosPerfil">
+                {/* CABEÇALHO FIXO */}
+                <div className="cabecalhoFixo">
+                  <div className="dadosArea_boxAreaPersonCadastros">
+                    <p>Nome</p>
+                    <p>Email</p>
+                    <p>Telefone</p>
+                    <p>Tipo</p>
+                    <p>Status</p>
+                    <p>Desativar</p>
+                    <p>Redefinir Senha</p>
+                  </div>
+                </div>
 
+                {/* ÁREA COM SCROLL PARA OS DADOS */}
+                <div className="dadosArea_boxCadastrosPerfil">
+                  <div className="dadosArea_boxAreaCadastrosPerfil">
+                    {todosPerfis.length > 0 ? (
+                      todosPerfis.map((perfil) => (
+                        <div key={perfil.ID} className="dadosArea_boxAreaDataCadastros">
+                          <div className="dadosArea_boxAreaPersonCadastros">
+                            <p className="truncate itemCentralizado">{perfil.Nome}</p>
+                            <p className="truncate itemCentralizado">{perfil.Email}</p>
+                            <p className="truncate itemCentralizado">{perfil.Telefone}</p>
+                            <p className="truncate itemCentralizado">{perfil.Tipo}</p>
+                            <p className="truncate itemCentralizado">
+                              {perfil.Ativo === 1 ? "Ativo" : "Inativo"}
+                            </p>
+                            
+                            {/* Coluna Ação: Desativar */}
+                            <div className="itemCentralizado">
+                              <Image alt="desativar" height={25} width={25} src={"/images/eye_icon.svg"} style={{ cursor: "pointer" }} />
+                            </div>
+
+                            {/* Coluna Ação: Redefinir Senha */}
+                            <div className="itemCentralizado">
+                              <Image alt="senha" height={25} width={25} src={"/images/eye_icon.svg"} style={{ cursor: "pointer" }} />
+                            </div>
+                            
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p style={{ textAlign: "center", marginTop: "20px", color: "#7b7e79" }}>Nenhum perfil encontrado.</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <p>Nenhum perfil encontrado.</p>
+            )}
           </>
           }
         </div>

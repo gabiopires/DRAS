@@ -25,17 +25,7 @@ export default function Cadastros() {
   const router = useRouter();
 
   useEffect(() => {
-    const perm = localStorage.getItem("permissão");
-    if(!perm){
-      setshowAlerts(true)
-      dataAlerts = {
-        alertText: "Redirecionando para o login",
-        alertButtons: ["Ok"],
-        alertsCommans: [()=>{setshowAlerts(false);router.push("/");}]
-      } 
-    }else{
-      handleGetAll();
-    }
+    handleGetAll();
   }, [cadastro]);
 
   const handleGetAll = async () => {

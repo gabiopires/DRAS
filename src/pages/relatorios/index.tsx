@@ -38,16 +38,8 @@ export default function Relatorios() {
     const { data, loading, error } = useRelatorioData();
 
     useEffect(() => {
-        const perm = localStorage.getItem("permissão");
-        if(!perm){
-            setshowAlerts(true)
-            dataAlerts = {
-            alertText: "Redirecionando para o login",
-            alertButtons: ["Ok"],
-            alertsCommans: [()=>{setshowAlerts(false);router.push("/");}]
-            } 
-        }
-      }, []);
+        
+    }, []);
 
     // Função para renderizar o gráfico baseado no estado 'activeChart'
     const renderChart = () => {

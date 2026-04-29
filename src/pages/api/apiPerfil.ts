@@ -43,20 +43,43 @@ export default async function handler(
 
     // Busca dados do usuário
     if (req.method === "GET") {
-      const [rows]: any = await connection.query(
-        `SELECT ID, Nome, Email, Telefone, Endereco, Tipo, Senha
-         FROM usuario 
-         WHERE ID = ? LIMIT 1`,
-        [idParaBuscar]
-      );
+      const { action } = req.query;
 
-      if (rows.length === 0) {
+      //Buscar TODOS os usuários
+      if (action === "buscarTodos") {
+        
+        //Somente admin pode listar todos
+        if (usuarioLogado.tipo !== 'Administrador') {
+          connection.release();
+          return res.status(403).json({ message: "Acesso negado. Apenas administradores." });
+        }
+
+        // Busca os usuários
+        const [rows]: any = await connection.query(
+          `SELECT ID, Nome, Email, Telefone, Tipo, Ativo FROM usuario ORDER BY Nome ASC`
+        );
+
         connection.release();
-        return res.status(404).json({ message: "Usuário não encontrado" });
-      }
+        return res.status(200).json({ users: rows });
+      
+      } 
+      // Ação 2: Buscar apenas o usuário logado (padrão)
+      else {
+        const [rows]: any = await connection.query(
+          `SELECT ID, Nome, Email, Telefone, Endereco, Tipo, Senha
+          FROM usuario 
+          WHERE ID = ? LIMIT 1`,
+          [idParaBuscar]
+        );
 
-      connection.release();
-      return res.status(200).json({ user: rows[0] });
+        if (rows.length === 0) {
+          connection.release();
+          return res.status(404).json({ message: "Usuário não encontrado" });
+        }
+
+        connection.release();
+        return res.status(200).json({ user: rows[0] });
+      }
     }
 
     // Atualiza dados do usuário
