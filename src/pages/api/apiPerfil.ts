@@ -5,10 +5,7 @@ import pool from "../../../components/db";
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse){
 
   // Permitir apenas GET, PUT e POST
   if (!["GET", "PUT", 'POST'].includes(req.method!)) {
@@ -56,7 +53,8 @@ export default async function handler(
 
         // Busca os usuários
         const [rows]: any = await connection.query(
-          `SELECT ID, Nome, Email, Telefone, Tipo, Ativo FROM usuario ORDER BY Nome ASC`
+          `SELECT ID, Nome, Email, Telefone, Tipo, Ativo FROM usuario WHERE ID != ? ORDER BY Nome ASC`,
+          [idParaBuscar]
         );
 
         connection.release();
@@ -85,54 +83,89 @@ export default async function handler(
     // Atualiza dados do usuário
     if (req.method === "PUT") {
       // Recebe os dados do body (agora com senhaAnterior e novaSenha)
-      const { nome, telefone, endereco, email, senhaAnterior, novaSenha } = req.body;
+      const { id, nome, telefone, endereco, email, senhaAnterior, novaSenha, action, status } = req.body;
+      if(action === "desativar") {
+        // Somente admin pode desativar um usuário
+        if (usuarioLogado.tipo !== 'Administrador') {
+          connection.release();
+          return res.status(403).json({ message: "Acesso negado. Apenas administradores." });
+        }
 
-      // Monta a query inicial e os parâmetros padrão (sem a senha)
-      let queryUpdate = `UPDATE usuario SET Nome = ?, Telefone = ?, Endereco = ?, Email = ?`;
-      let paramsUpdate: any[] = [nome, telefone, endereco, email];
-
-      // Verifica se a novaSenha foi enviada e não está vazia
-      if (novaSenha && novaSenha.trim() !== "") {
-        
-        // 1. Busca a senha atual que está salva no banco (o hash)
-        const [usuarioAtual]: any = await connection.query(
-          `SELECT Senha FROM usuario WHERE ID = ? LIMIT 1`,
-          [idParaBuscar]
+        await connection.query(
+          `UPDATE usuario SET Ativo = ? WHERE ID = ?`,
+          [status === 1 ? 0 : 1, id]
         );
 
-        if (usuarioAtual.length === 0) {
+        connection.release();
+
+        return res.status(200).json({ message: "Usuário desativado com sucesso!" });
+      }else if (action === "redefinirSenha") {
+        // Somente admin pode redefinir senhas
+        if (usuarioLogado.tipo !== 'Administrador') {
           connection.release();
-          return res.status(404).json({ message: "Usuário não encontrado" });
+          return res.status(403).json({ message: "Acesso negado. Apenas administradores." });
         }
 
-        const hashNoBanco = usuarioAtual[0].Senha;
-
-        // 2. Compara a 'senhaAnterior' digitada com o hash salvo no banco
-        const senhaAnteriorEstaCorreta = await bcrypt.compare(senhaAnterior, hashNoBanco);
-
-        // Se a senha anterior estiver incorreta, bloqueia a atualização
-        if (!senhaAnteriorEstaCorreta) {
-          connection.release();
-          return res.status(400).json({ message: "A senha atual informada está incorreta." });
-        }
-
-        // 3. Se passou na validação, faz o hash da NOVA senha e adiciona na query
+        const senhaPadrao = 'novoUsuario';
         const saltRounds = 10;
-        const senhaHasheada = await bcrypt.hash(novaSenha, saltRounds);
-        
-        queryUpdate += `, Senha = ?`;
-        paramsUpdate.push(senhaHasheada);
+        const senhaHasheada = await bcrypt.hash(senhaPadrao, saltRounds);
+
+        await connection.query(
+          `UPDATE usuario SET Senha = ? WHERE ID = ?`,
+          [senhaHasheada, id]
+        );
+
+        connection.release();
+        return res.status(200).json({ message: "Senha redefinida com sucesso!" });
+
+      }else{
+        // Monta a query inicial e os parâmetros padrão (sem a senha)
+        let queryUpdate = `UPDATE usuario SET Nome = ?, Telefone = ?, Endereco = ?, Email = ?`;
+        let paramsUpdate: any[] = [nome, telefone, endereco, email];
+
+        // Verifica se a novaSenha foi enviada e não está vazia
+        if (novaSenha && novaSenha.trim() !== "") {
+          
+          // 1. Busca a senha atual que está salva no banco (o hash)
+          const [usuarioAtual]: any = await connection.query(
+            `SELECT Senha FROM usuario WHERE ID = ? LIMIT 1`,
+            [idParaBuscar]
+          );
+
+          if (usuarioAtual.length === 0) {
+            connection.release();
+            return res.status(404).json({ message: "Usuário não encontrado" });
+          }
+
+          const hashNoBanco = usuarioAtual[0].Senha;
+
+          // 2. Compara a 'senhaAnterior' digitada com o hash salvo no banco
+          const senhaAnteriorEstaCorreta = await bcrypt.compare(senhaAnterior, hashNoBanco);
+
+          // Se a senha anterior estiver incorreta, bloqueia a atualização
+          if (!senhaAnteriorEstaCorreta) {
+            connection.release();
+            return res.status(400).json({ message: "A senha atual informada está incorreta." });
+          }
+
+          // 3. Se passou na validação, faz o hash da NOVA senha e adiciona na query
+          const saltRounds = 10;
+          const senhaHasheada = await bcrypt.hash(novaSenha, saltRounds);
+          
+          queryUpdate += `, Senha = ?`;
+          paramsUpdate.push(senhaHasheada);
+        }
+
+        // Finaliza a montagem da query com a condição WHERE
+        queryUpdate += ` WHERE ID = ?`;
+        paramsUpdate.push(idParaBuscar);
+
+        // Executa a query (com ou sem a coluna de senha inclusa)
+        await connection.query(queryUpdate, paramsUpdate);
+
+        connection.release();
+        return res.status(200).json({ message: "Perfil atualizado com sucesso!" });
       }
-
-      // Finaliza a montagem da query com a condição WHERE
-      queryUpdate += ` WHERE ID = ?`;
-      paramsUpdate.push(idParaBuscar);
-
-      // Executa a query (com ou sem a coluna de senha inclusa)
-      await connection.query(queryUpdate, paramsUpdate);
-
-      connection.release();
-      return res.status(200).json({ message: "Perfil atualizado com sucesso!" });
     }
 
     // Cadastro de novo usuário

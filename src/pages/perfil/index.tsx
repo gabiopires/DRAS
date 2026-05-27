@@ -223,6 +223,110 @@ export default function Perfil() {
     setHabilitarEditarSenha(true);
   }
 
+  function desativarUsuario(id: number, statusAtual: number) {
+    // 1. Prepara o alerta de confirmação
+    dataAlerts = {
+      alertText: statusAtual === 1 ? "Tem certeza que deseja desativar este usuário?" : "Tem certeza que deseja ativar este usuário?",
+      alertButtons: ["Sim", "Cancelar"],
+      alertsCommans: [
+        // AÇÃO DO BOTÃO "SIM" (Posição 0)
+        async () => {
+          // Oculta o alerta de confirmação temporariamente (opcional, dá sensação de carregamento)
+          setshowAlerts(false); 
+          
+          try {
+            const resp = await fetch(`/api/apiPerfil`, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({id: id, action: "desativar", status: statusAtual}),
+            });
+
+            if(resp.status === 200) {
+              dataAlerts = {
+                alertText: statusAtual === 1 ? "Perfil desativado com sucesso!" : "Perfil ativado com sucesso!",
+                alertButtons: ["Ok"],
+                alertsCommans: [()=>{setshowAlerts(false); window.location.reload();}]
+              };
+              // Exibe o alerta de sucesso
+              setTimeout(() => setshowAlerts(true), 100); 
+            } else {
+              dataAlerts = {
+                alertText: statusAtual === 1 ? "Erro ao desativar perfil. Tente novamente mais tarde." : "Erro ao ativar perfil. Tente novamente mais tarde.",
+                alertButtons: ["Ok"],
+                alertsCommans: [()=>{setshowAlerts(false); window.location.reload();}]
+              };
+              setTimeout(() => setshowAlerts(true), 100);
+            }
+          } catch (error) {
+            dataAlerts = {
+              alertText: statusAtual === 1 ? "Erro ao desativar perfil. Tente novamente mais tarde." : "Erro ao ativar perfil. Tente novamente mais tarde.",
+              alertButtons: ["Ok"],
+              alertsCommans: [()=>{setshowAlerts(false); window.location.reload();}]
+            };
+            setTimeout(() => setshowAlerts(true), 100);
+          }
+        },
+        
+        // AÇÃO DO BOTÃO "CANCELAR" (Posição 1)
+        () => {
+          setshowAlerts(false);
+        }
+      ]
+    };
+    
+    // 2. Dispara a renderização do alerta na tela
+    setshowAlerts(true);
+  }
+
+  function redefinirSenha(id: number) {
+    dataAlerts = {
+      alertText: "Tem certeza que deseja redefinir a senha deste usuário?",
+      alertButtons: ["Sim", "Cancelar"],
+      alertsCommans: [
+        async () => {
+          setshowAlerts(false); 
+          
+          try {
+            const resp = await fetch(`/api/apiPerfil`, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({id: id, action: "redefinirSenha"}),
+            });
+
+            if(resp.status === 200) {
+              dataAlerts = {
+                alertText: "Senha redefinida com sucesso para: novoUsuario",
+                alertButtons: ["Ok"],
+                alertsCommans: [()=>{setshowAlerts(false);}] 
+                // Nota: não precisa de window.location.reload() aqui pois a tela não muda visualmente
+              };
+              setTimeout(() => setshowAlerts(true), 100); 
+            } else {
+              dataAlerts = {
+                alertText: "Erro ao redefinir senha. Tente novamente.",
+                alertButtons: ["Ok"],
+                alertsCommans: [()=>{setshowAlerts(false);}]
+              };
+              setTimeout(() => setshowAlerts(true), 100);
+            }
+          } catch (error) {
+            dataAlerts = {
+              alertText: "Erro ao redefinir senha. Tente novamente.",
+              alertButtons: ["Ok"],
+              alertsCommans: [()=>{setshowAlerts(false);}]
+            };
+            setTimeout(() => setshowAlerts(true), 100);
+          }
+        },
+        () => {
+          setshowAlerts(false);
+        }
+      ]
+    };
+    
+    setshowAlerts(true);
+  }
+
   return (
     <div>
       <Menu page={5} />
@@ -339,7 +443,7 @@ export default function Perfil() {
                     <p>Telefone</p>
                     <p>Tipo</p>
                     <p>Status</p>
-                    <p>Desativar</p>
+                    <p>Status</p>
                     <p>Redefinir Senha</p>
                   </div>
                 </div>
@@ -360,13 +464,13 @@ export default function Perfil() {
                             </p>
                             
                             {/* Coluna Ação: Desativar */}
-                            <div className="itemCentralizado">
-                              <Image alt="desativar" height={25} width={25} src={"/images/eye_icon.svg"} style={{ cursor: "pointer" }} />
+                            <div className="itemCentralizado" onClick={()=>{desativarUsuario(perfil.ID, perfil.Ativo)}}>
+                              <Image alt="desativar" height={25} width={25} src={perfil.Ativo === 1 ? "/images/disable_orange.svg" : "/images/enable_orange.svg"} style={{ cursor: "pointer" }} />
                             </div>
 
                             {/* Coluna Ação: Redefinir Senha */}
-                            <div className="itemCentralizado">
-                              <Image alt="senha" height={25} width={25} src={"/images/eye_icon.svg"} style={{ cursor: "pointer" }} />
+                            <div className="itemCentralizado" onClick={() => {redefinirSenha(perfil.ID)}}>
+                              <Image alt="senha" height={25} width={25} src={"/images/password_orange.svg"} style={{ cursor: "pointer" }} />
                             </div>
                             
                           </div>

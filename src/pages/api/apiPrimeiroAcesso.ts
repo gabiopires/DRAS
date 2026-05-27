@@ -3,6 +3,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import pool from "../../../components/db";
 import bcrypt from 'bcrypt';
+import { serialize } from 'cookie';
 
 export default async function handler( req: NextApiRequest, res: NextApiResponse) {
     //Validação do Método
@@ -44,6 +45,10 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
             `UPDATE usuario SET Senha = ? WHERE Email = ?`,
             [senhaHasheada, email]
         );
+
+        const limparCookieTemp = serialize('primeiro_acesso_token', '', {maxAge: -1, path: '/',});
+
+        res.setHeader('Set-Cookie', limparCookieTemp);
 
         connection.release();
         // Retorna sucesso!

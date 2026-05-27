@@ -51,9 +51,27 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
     const SENHA_PADRAO = 'novoUsuario'; 
 
     if (senha === SENHA_PADRAO) {
+      const JWT_SECRET = process.env.JWT_SECRET;
+      if (!JWT_SECRET) throw new Error("JWT_SECRET não configurado.");
+
+      // Cria um token temporário só para a página de primeiro acesso
+      const tokenTemporario = jwt.sign(
+        { userId: user.ID, tipo: user.Tipo, primeiroAcesso: true }, 
+        JWT_SECRET, 
+        { expiresIn: '15m' } 
+      );
+
+      const cookieTemp = serialize('primeiro_acesso_token', tokenTemporario, {
+        httpOnly: true, 
+        secure: process.env.NODE_ENV === 'production', 
+        sameSite: 'strict', 
+        maxAge: 60 * 15,
+        path: '/', 
+      });
+
+      res.setHeader('Set-Cookie', cookieTemp);
       connection.release();
       
-      // Retornamos 403 (Acesso Negado/Proibido no momento)
       return res.status(403).json({ 
         message: "Primeiro acesso detectado. Redefinição de senha obrigatória.",
         novoUsuario: true,
