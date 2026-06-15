@@ -99,7 +99,10 @@ export default function Cadastros() {
     <div className="cadastros">
       {showAlerts&&<Alerta dataAlert={dataAlerts}/>}
       <Menu page={1} cadastro={cadastro} />
-      <p className="cadastrosTitulo">Atendimentos Não Finalizados</p>
+      <div>
+        <p className="cadastrosTitulo">Atendimentos</p>
+        <button className="cadastrosButton" onClick={() => router.push("/cadastros/novo")}>Novo atendimento</button>
+      </div>
       <div className="pesquisaArea">
         <div className="pesquisaArea_div">
           <label className="pesquisaArea_div_label">Nome</label>
@@ -195,6 +198,7 @@ export default function Cadastros() {
             setCadastro(false);
             setPersonSelect(undefined);
             setSelectedIds(-1);
+            window.location.reload();
           }}
         />
       )}

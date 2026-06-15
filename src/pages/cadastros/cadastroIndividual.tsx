@@ -45,14 +45,38 @@ export default function CadastroIndividual({ pessoa, onClose }: Props) {
   const [dataCentroSaude, setDataCentroSaude] = useState<{id: string, descricao: string}[]>([]);
   const [permissao, setPermissao] = useState<string>("");
   const [showAlerts,setshowAlerts]= useState(false);
+  const [tipo, setTipo] = useState("");
 
   useEffect(()=>{
-    initData();
-    const perm = localStorage.getItem("permissão");
-    if(perm){
-      setPermissao(perm)
-    }
+    carregarPerfil();
   },[]);
+
+  async function carregarPerfil() {
+    try {
+      const resp = await fetch(`/api/apiPerfil`);
+      const data = await resp.json();
+
+      if(resp.status === 200 && data.user) {
+        setTipo(data.user.Tipo);
+      }else if(resp.status === 404){
+        setshowAlerts(true)
+        dataAlerts = {
+          alertText: "Usuário não encontrado",
+          alertButtons: ["Ok"],
+          alertsCommans: [()=>{setshowAlerts(false)}]
+        }
+      }else{
+        setshowAlerts(true)
+        dataAlerts = {
+          alertText: "Erro ao carregar perfil",
+          alertButtons: ["Ok"],
+          alertsCommans: [()=>{setshowAlerts(false)}]
+        }
+      }
+    } catch (error) {
+      console.log("Erro ao carregar perfil:", error);
+    }
+  }
 
   const initData = async () =>{
     try{
@@ -275,68 +299,100 @@ export default function CadastroIndividual({ pessoa, onClose }: Props) {
   }
 
   async function finalizar(){
-    try{
-      const endpont = `/api/apiCadastrar?action=finalizar`;
-      const bodyData = { finalizar: "Sim", idAtendimento: pessoa?.idAtendimento };
-      const response=await fetch(endpont,{method: "PUT", cache: "reload", headers: { "Content-Type": "application/json", }, body: JSON.stringify(bodyData) })
-      const data = await response.json();
-      if(response.status === 201){
-        setshowAlerts(true)
-        dataAlerts = {
-          alertText: "Atendimento finalizado com sucesso!",
-          alertButtons: ["Ok"],
-          alertsCommans: [()=>{setshowAlerts(false);onClose()}]
+    setshowAlerts(true)
+    dataAlerts = {
+      alertText: "Tem certeza que deseja finalizar este atendimento?",
+      alertButtons: ["Sim", "Cancelar"],
+      alertsCommans: [async ()=>{
+        setshowAlerts(false);
+        try{
+          const endpont = `/api/apiCadastrar?action=finalizar`;
+          const bodyData = { finalizar: "Sim", idAtendimento: pessoa?.idAtendimento };
+          const response=await fetch(endpont,{method: "PUT", cache: "reload", headers: { "Content-Type": "application/json", }, body: JSON.stringify(bodyData) })
+          const data = await response.json();
+          if(response.status === 201){
+            setshowAlerts(true)
+            dataAlerts = {
+              alertText: "Atendimento finalizado com sucesso!",
+              alertButtons: ["Ok"],
+              alertsCommans: [()=>{setshowAlerts(false);onClose()}]
+            }
+          }else if (response.status === 401){
+            setshowAlerts(true)
+            dataAlerts = {
+              alertText: "Erro inesperado no servidor, tente novamente mais tarde",
+              alertButtons: ["Editar"],
+              alertsCommans: [()=>{setshowAlerts(false);onClose()}]
+            }
+          }else{
+            setshowAlerts(true)
+            dataAlerts = {
+              alertText: "Erro inesperado no servidor, tente novamente mais tarde",
+              alertButtons: ["Ok"],
+              alertsCommans: [()=>{setshowAlerts(false);onClose()}]
+            }
+          }
+        }catch(error){
+          console.log(error)
         }
-      }else if (response.status === 401){
-        setshowAlerts(true)
-        dataAlerts = {
-          alertText: "Erro inesperado no servidor, tente novamente mais tarde",
-          alertButtons: ["Editar"],
-          alertsCommans: [()=>{setshowAlerts(false);onClose()}]
-        }
-      }else{
-        setshowAlerts(true)
-        dataAlerts = {
-          alertText: "Erro inesperado no servidor, tente novamente mais tarde",
-          alertButtons: ["Ok"],
-          alertsCommans: [()=>{setshowAlerts(false);onClose()}]
-        }
-      }
-    }catch(error){
-      console.log(error)
+      },
+      () => {
+        setshowAlerts(false);
+      }]
     }
   }
 
   async function excluir(){
-    try{
-      const endpont = `/api/apiCadastrar?action=excluir`;
-      const bodyData = { idPessoa: pessoa?.idPessoa, idAtendimento: pessoa?.idAtendimento };
-      const response=await fetch(endpont,{method: "DELETE", cache: "reload", headers: { "Content-Type": "application/json", }, body: JSON.stringify(bodyData) })
-      const data = await response.json();
-      if(response.status === 201){
-        setshowAlerts(true)
-        dataAlerts = {
-          alertText: "Atendimento excluido com sucesso!",
-          alertButtons: ["Ok"],
-          alertsCommans: [()=>{setshowAlerts(false);onClose()}]
-        }
-      }else if (response.status === 401){
-        setshowAlerts(true)
-        dataAlerts = {
-          alertText: "Erro inesperado no servidor, tente novamente mais tarde",
-          alertButtons: ["Editar"],
-          alertsCommans: [()=>{setshowAlerts(false);onClose()}]
-        }
-      }else{
-        setshowAlerts(true)
-        dataAlerts = {
-          alertText: "Erro inesperado no servidor, tente novamente mais tarde",
-          alertButtons: ["Ok"],
-          alertsCommans: [()=>{setshowAlerts(false);onClose()}]
-        }
-      }
-    }catch(error){
-      console.log(error)
+    // 1. Dispara o alerta de confirmação na tela
+    setshowAlerts(true)
+    dataAlerts = {
+      alertText: "Tem certeza que deseja excluir este atendimento?",
+      alertButtons: ["Sim", "Cancelar"],
+      alertsCommans: [
+        // AÇÃO DO BOTÃO "SIM" (Posição 0)
+        async ()=>{
+          setshowAlerts(false); // Oculta o modal de pergunta
+          
+          try{
+            const endpont = `/api/apiCadastrar?action=excluir`;
+            const bodyData = { idPessoa: pessoa?.idPessoa, idAtendimento: pessoa?.idAtendimento };
+            const response = await fetch(endpont,{
+              method: "DELETE", 
+              cache: "reload", 
+              headers: { "Content-Type": "application/json" }, 
+              body: JSON.stringify(bodyData) 
+            });
+            const data = await response.json();
+            if(response.status === 200){
+              setshowAlerts(true)
+              dataAlerts = {
+                alertText: "Atendimento excluído com sucesso!",
+                alertButtons: ["Ok"],
+                alertsCommans: [()=>{setshowAlerts(false);onClose()}]
+              }
+            } else if (response.status === 401){
+              setshowAlerts(true)
+              dataAlerts = {
+                alertText: "Erro inesperado no servidor, tente novamente mais tarde",
+                alertButtons: ["Editar"],
+                alertsCommans: [()=>{setshowAlerts(false);onClose()}]
+              }
+            } else {
+              setshowAlerts(true)
+              dataAlerts = {
+                alertText: "Erro inesperado no servidor, tente novamente mais tarde",
+                alertButtons: ["Ok"],
+                alertsCommans: [()=>{setshowAlerts(false);onClose()}]
+              }
+            }
+          }catch(error){
+            console.log(error)
+          }
+      },
+      // AÇÃO DO BOTÃO "CANCELAR" (Posição 1)
+      () => {
+        setshowAlerts(false);
+      }]
     }
   }
 
@@ -609,11 +665,11 @@ export default function CadastroIndividual({ pessoa, onClose }: Props) {
         </div>
 
         <div className="cadastroModal_buttons">
-          <button className="cadastroModal_buttonsEditar" onClick={()=>{saveEdit()}}>{edit?"Salvar":"Editar"}</button>
-          {!edit&&<button className="cadastroModal_buttonsFinalizar" onClick={()=>{finalizar()}}>Concluir</button>}
+          <button className="cadastroModal_buttonsEditar" onClick={()=>{saveEdit()}}>{edit?"Salvar":"Editar atendimento"}</button>
+          {!edit&&<button className="cadastroModal_buttonsFinalizar" onClick={()=>{finalizar()}}>Finalizar atendimento</button>}
           {!edit &&
             <>
-              {permissao == "Administrador" && <button className="cadastroModal_buttonsExcluir" onClick={()=>{excluir()}}>Excluir</button>}
+              {tipo == "Administrador" && <button className="cadastroModal_buttonsExcluir" onClick={()=>{excluir()}}>Excluir</button>}
             </>
           }
         </div>
