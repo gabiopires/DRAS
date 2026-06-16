@@ -38,7 +38,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
     const user = rows[0];
 
     //Compara a senha digitada em texto limpo com o hash salvo no banco
-    const senhaValida = true;
+    const senhaValida = await bcrypt.compare(senha, user.Senha);
 
     if (!senhaValida) {
       connection.release();
