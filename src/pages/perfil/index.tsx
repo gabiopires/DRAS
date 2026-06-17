@@ -123,7 +123,7 @@ export default function Perfil() {
       if(resp.status === 201) {
         setshowAlerts(true)
         dataAlerts = {
-          alertText: "Perfil cadastrado com sucesso!",
+          alertText: "Perfil cadastrado com sucesso! O e-mail informado será utilizado como login e a senha inicial será: novoUsuario",
           alertButtons: ["Ok"],
           alertsCommans: [()=>{setshowAlerts(false);window.location.reload();}]
         }

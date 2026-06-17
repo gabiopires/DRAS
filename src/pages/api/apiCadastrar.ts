@@ -69,15 +69,15 @@ export default async function Cadastrar(req: NextApiRequest, res: NextApiRespons
             cenSau.descricao AS centroSaude
           FROM atendimento ate
           LEFT JOIN pessoa p ON ate.id_pessoa = p.id
-          LEFT JOIN categoriaUsuario caU ON p.id_categoriaUsuario = caU.id
+          LEFT JOIN categoriausuario caU ON p.id_categoriaUsuario = caU.id
           LEFT JOIN territorio t ON p.id_territorio = t.id
           LEFT JOIN encaminhamento en ON ate.id_encaminhamento = en.id
-          LEFT JOIN tecnicoResponsavel tec ON ate.id_tecnicoResponsavel = tec.id
-          LEFT JOIN tiposViolacao vio ON ate.id_violacao = vio.id
-          LEFT JOIN tiposVulnerabilidade vul ON ate.id_tiposVulnerabilidade = vul.id
-          LEFT JOIN prazoAtendimento pAte ON ate.id_prazoAtendimento = pAte.id
-          LEFT JOIN tiposIdentificacao iden ON p.id_tiposIdentificacao = iden.id
-          LEFT JOIN tiposCentroSaude cenSau ON p.id_centroSaude = cenSau.id
+          LEFT JOIN tecnicoresponsavel tec ON ate.id_tecnicoResponsavel = tec.id
+          LEFT JOIN tiposviolacao vio ON ate.id_violacao = vio.id
+          LEFT JOIN tiposvulnerabilidade vul ON ate.id_tiposVulnerabilidade = vul.id
+          LEFT JOIN prazoatendimento pAte ON ate.id_prazoAtendimento = pAte.id
+          LEFT JOIN tiposidentificacao iden ON p.id_tiposIdentificacao = iden.id
+          LEFT JOIN tiposcentrosaude cenSau ON p.id_centroSaude = cenSau.id
           WHERE p.nome LIKE CONCAT('%', ?, '%')
             AND p.endereco LIKE CONCAT('%', ?, '%')
             AND p.referenciaFamiliar LIKE CONCAT('%', ?, '%')
@@ -91,14 +91,14 @@ export default async function Cadastrar(req: NextApiRequest, res: NextApiRespons
         const [ [territorios], [categorias], [vulnerabilidades], [violacao], [tecnicoResponsavel], [encaminhamento], [prazoAtendimento], [tiposIdentificacao], [centroSaude]] =
         await Promise.all([
           connection.query(`SELECT * FROM territorio`),
-          connection.query(`SELECT * FROM categoriaUsuario`),
-          connection.query(`SELECT * FROM tiposVulnerabilidade`),
-          connection.query(`SELECT * FROM tiposViolacao`),
-          connection.query(`SELECT * FROM tecnicoResponsavel`),
+          connection.query(`SELECT * FROM categoriausuario`),
+          connection.query(`SELECT * FROM tiposvulnerabilidade`),
+          connection.query(`SELECT * FROM tiposviolacao`),
+          connection.query(`SELECT * FROM tecnicoresponsavel`),
           connection.query(`SELECT * FROM encaminhamento`),
-          connection.query(`SELECT * FROM prazoAtendimento`),
-          connection.query(`SELECT * FROM tiposIdentificacao`),
-          connection.query(`SELECT * FROM tiposCentroSaude`)
+          connection.query(`SELECT * FROM prazoatendimento`),
+          connection.query(`SELECT * FROM tiposidentificacao`),
+          connection.query(`SELECT * FROM tiposcentrosaude`)
         ]);
 
         connection.release();

@@ -26,17 +26,7 @@ export default function Exportar() {
   );
 
   useEffect(()=>{
-    const perm = localStorage.getItem("permissão");
-    if(!perm){
-      setshowAlerts(true)
-      dataAlerts = {
-        alertText: "Redirecionando para o login",
-        alertButtons: ["Ok"],
-        alertsCommans: [()=>{setshowAlerts(false);router.push("/");}]
-      } 
-    }else{
-      initData();
-    }
+    initData();
   },[])
 
   const initData = async () =>{

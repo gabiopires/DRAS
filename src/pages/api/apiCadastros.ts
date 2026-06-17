@@ -45,15 +45,15 @@ export default async function handler(
       cenSau.id AS idCentroSaude, cenSau.descricao AS centroSaude
     FROM atendimento ate
     LEFT JOIN pessoa p ON ate.id_pessoa = p.id
-    LEFT JOIN categoriaUsuario caU ON p.id_categoriaUsuario = caU.id
+    LEFT JOIN categoriausuario caU ON p.id_categoriaUsuario = caU.id
     LEFT JOIN territorio t ON p.id_territorio = t.id
     LEFT JOIN encaminhamento en ON ate.id_encaminhamento = en.id
-    LEFT JOIN tecnicoResponsavel tec ON ate.id_tecnicoResponsavel = tec.id
-    LEFT JOIN tiposViolacao vio ON ate.id_violacao = vio.id
-    LEFT JOIN tiposVulnerabilidade vul ON ate.id_tiposVulnerabilidade = vul.id
-    LEFT JOIN prazoAtendimento pAte ON ate.id_prazoAtendimento = pAte.id
-    LEFT JOIN tiposIdentificacao iden ON p.id_tiposIdentificacao = iden.id
-    LEFT JOIN tiposCentroSaude cenSau ON p.id_centroSaude = cenSau.id
+    LEFT JOIN tecnicoresponsavel tec ON ate.id_tecnicoResponsavel = tec.id
+    LEFT JOIN tiposviolacao vio ON ate.id_violacao = vio.id
+    LEFT JOIN tiposvulnerabilidade vul ON ate.id_tiposVulnerabilidade = vul.id
+    LEFT JOIN prazoatendimento pAte ON ate.id_prazoAtendimento = pAte.id
+    LEFT JOIN tiposidentificacao iden ON p.id_tiposIdentificacao = iden.id
+    LEFT JOIN tiposcentrosaude cenSau ON p.id_centroSaude = cenSau.id
   `;
 
   try {
